@@ -1,0 +1,50 @@
+/* Design tokens — import this first in global.css */
+:root {
+  /* Backgrounds */
+  --bg:  #0e0f11;
+  --bg2: #161719;
+  --bg3: #1e2022;
+  --bg4: #252729;
+
+  /* Text */
+  --text:  #e8e6e1;
+  --muted: #8a8882;
+  --dim:   #5a5854;
+
+  /* Accents */
+  --amber: #f5a623;
+  --teal:  #3dd6c0;
+  --coral: #ff6b5b;
+  --blue:  #5b8ff9;
+  --green: #5fd68a;
+
+  /* Semantic severity */
+  --critical: var(--coral);
+  --warning:  var(--amber);
+  --info:     var(--blue);
+  --success:  var(--green);
+
+  /* Typography */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-ui:      'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  /* Shape */
+  --r:  8px;
+  --r2: 12px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Breakpoints (reference only — use in media queries) */
+  /* --bp-mobile: 375px  */
+  /* --bp-tablet: 768px  */
+  /* --bp-desktop: 1200px */
+}
