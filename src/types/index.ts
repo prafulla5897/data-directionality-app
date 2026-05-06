@@ -92,6 +92,7 @@ export interface AppState {
     selectedDimensions: string[];
     dateRangeStart: Date | null;
     dateRangeEnd: Date | null;
+    aggregateOther: boolean;
   };
   windowConfig: {
     baselineStart: Date | null;

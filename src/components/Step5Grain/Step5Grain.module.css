@@ -1,0 +1,195 @@
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.heading {
+  font-family: var(--font-display);
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.subheading {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: var(--space-1);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionLabel {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.grainRow {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.grainBtn {
+  background: var(--bg2);
+  border: 1px solid var(--bg4);
+  border-radius: var(--r);
+  color: var(--text);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 88px;
+}
+
+.grainBtn:hover:not(:disabled) {
+  background: var(--bg3);
+}
+
+.grainBtnActive {
+  background: color-mix(in srgb, var(--amber) 15%, var(--bg2));
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.grainBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.recommendedBadge {
+  font-size: 0.65rem;
+  color: var(--teal);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.disabledNote {
+  font-size: 0.65rem;
+  color: var(--dim);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.warning {
+  background: color-mix(in srgb, var(--amber) 10%, var(--bg3));
+  border: 1px solid var(--amber);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-4);
+  color: var(--amber);
+  font-size: 0.875rem;
+}
+
+.advancedToggle {
+  background: none;
+  color: var(--muted);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.advancedToggle:hover {
+  color: var(--text);
+}
+
+.advancedPanel {
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.sliderLabel {
+  color: var(--muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.slider {
+  flex: 1;
+  min-width: 120px;
+  accent-color: var(--amber);
+}
+
+.sliderValue {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text);
+  min-width: 48px;
+}
+
+.advancedNote {
+  color: var(--dim);
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--bg3);
+}
+
+.btnPrimary {
+  background: var(--amber);
+  color: var(--bg);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-5);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.15s;
+}
+
+.btnSecondary {
+  background: var(--bg4);
+  color: var(--text);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-5);
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.btnSecondary:hover {
+  background: var(--bg3);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4);
+  }
+}
