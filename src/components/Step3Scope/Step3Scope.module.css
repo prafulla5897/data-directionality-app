@@ -1,0 +1,206 @@
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.heading {
+  font-family: var(--font-display);
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.subheading {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: var(--space-1);
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--bg2);
+  border-radius: var(--r2);
+  padding: var(--space-4) var(--space-5);
+  flex-wrap: wrap;
+}
+
+.counterPart {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+}
+
+.counterSep {
+  color: var(--dim);
+  font-weight: 600;
+}
+
+.counterTotal {
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.counterOk {
+  color: var(--green);
+}
+
+.counterOver {
+  color: var(--coral);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sectionLabel {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.campaignRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-4);
+  transition: background 0.1s;
+}
+
+.campaignRow:hover {
+  background: var(--bg3);
+}
+
+.campaignLabel {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.campaignSpend {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.aggregateRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  color: var(--muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.aggregateRow input {
+  cursor: pointer;
+}
+
+.radioRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.radioRow:hover {
+  background: var(--bg3);
+}
+
+.radioRow input[type="radio"] {
+  cursor: pointer;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+}
+
+.dateInput {
+  background: var(--bg3);
+  border: 1px solid var(--bg4);
+  border-radius: var(--r);
+  color: var(--text);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  color-scheme: dark;
+}
+
+.hint {
+  background: color-mix(in srgb, var(--amber) 10%, var(--bg3));
+  border: 1px solid var(--amber);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-4);
+  color: var(--amber);
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--bg3);
+}
+
+.btnPrimary {
+  background: var(--amber);
+  color: var(--bg);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-5);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.15s;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  background: var(--bg4);
+  color: var(--text);
+  border-radius: var(--r);
+  padding: var(--space-3) var(--space-5);
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.btnSecondary:hover {
+  background: var(--bg3);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4);
+  }
+
+  .counter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

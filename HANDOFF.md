@@ -18,7 +18,7 @@ Read these files in this order before writing any code:
 2. CLAUDE.md        — how to code it (TypeScript standards, rules, constants)
 3. PHASES.md        — Phase [N] section only (current phase scope + criteria)
 
-Current phase: Phase 2 — Scope, Windows & Grain Configuration
+Current phase: Phase 3 — Analysis Engine
 Files relevant to this phase: [list paths]
 ```
 
@@ -46,7 +46,7 @@ Do NOT paste full file contents — reference by path and let Claude Code read t
 |---|---|---|---|
 | 0 — Scaffold | ✅ Complete | 2026-05-06 | tsc clean, build passes, lint clean, 180-row fixture with 3 injected anomalies |
 | 1 — Upload + Schema | ✅ Complete | 2026-05-06 | tsc clean, build passes, lint clean; parser/schemaDetector/fileMerger implemented; Step1Upload (drag-drop, size warning, two-file merge) and Step2Schema (reassignment, 3-tier formula builder) complete |
-| 2 — Scope + Windows + Grain | ⬜ Not started | — | — |
+| 2 — Scope + Windows + Grain | ✅ Complete | 2026-05-06 | tsc clean, build passes, lint clean; Step3Scope (campaign selector, date range, live counter), Step4Windows (baseline + anomaly window with warnings), Step5Grain (noise-to-signal auto-detect, display grain, advanced time budget slider, dimension limit warning) all implemented; App.tsx wires steps 3–5 with conditional Step 3 logic |
 | 3 — Analysis Engine | ⬜ Not started | — | — |
 | 4 — Dashboard | ⬜ Not started | — | — |
 | 5 — Polish | ⬜ Not started | — | — |

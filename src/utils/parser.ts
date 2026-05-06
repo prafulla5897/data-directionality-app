@@ -59,6 +59,39 @@ function parseCsv(file: File): Promise<RawRow[]> {
   });
 }
 
+/**
+ * Parse a single raw date value from a RawRow cell into a JavaScript Date.
+ * Supports ISO 8601, MM/DD/YYYY, DD-MMM-YYYY, and Excel serial number formats.
+ * @param raw - Raw cell value from a RawRow (string, number, or null)
+ * @returns Parsed Date object, or null if the value cannot be parsed
+ * @example
+ * parseDateValue('2024-01-15'); // Date representing Jan 15 2024
+ * parseDateValue('01/15/2024'); // Date representing Jan 15 2024
+ * parseDateValue(45000);        // Excel serial → corresponding Date
+ */
+export function parseDateValue(raw: string | number | null): Date | null {
+  if (raw === null || raw === undefined || raw === '') return null;
+  const s = String(raw).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mdy) {
+    const d = new Date(`${mdy[3]}-${mdy[1].padStart(2, '0')}-${mdy[2].padStart(2, '0')}`);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/.test(s)) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (/^\d{5}$/.test(s)) {
+    const d = new Date((parseInt(s) - 25569) * 86400 * 1000);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
 async function parseExcel(file: File): Promise<RawRow[]> {
   const buffer = await file.arrayBuffer();
   const workbook = read(buffer);
