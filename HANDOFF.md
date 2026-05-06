@@ -18,7 +18,7 @@ Read these files in this order before writing any code:
 2. CLAUDE.md        — how to code it (TypeScript standards, rules, constants)
 3. PHASES.md        — Phase [N] section only (current phase scope + criteria)
 
-Current phase: Phase 1 — File Upload & Schema Detection
+Current phase: Phase 2 — Scope, Windows & Grain Configuration
 Files relevant to this phase: [list paths]
 ```
 
@@ -45,7 +45,7 @@ Do NOT paste full file contents — reference by path and let Claude Code read t
 | Phase | Status | Date | Notes |
 |---|---|---|---|
 | 0 — Scaffold | ✅ Complete | 2026-05-06 | tsc clean, build passes, lint clean, 180-row fixture with 3 injected anomalies |
-| 1 — Upload + Schema | ⬜ Not started | — | — |
+| 1 — Upload + Schema | ✅ Complete | 2026-05-06 | tsc clean, build passes, lint clean; parser/schemaDetector/fileMerger implemented; Step1Upload (drag-drop, size warning, two-file merge) and Step2Schema (reassignment, 3-tier formula builder) complete |
 | 2 — Scope + Windows + Grain | ⬜ Not started | — | — |
 | 3 — Analysis Engine | ⬜ Not started | — | — |
 | 4 — Dashboard | ⬜ Not started | — | — |
