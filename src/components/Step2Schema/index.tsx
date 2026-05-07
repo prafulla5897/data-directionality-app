@@ -35,8 +35,10 @@ export function Step2Schema({ rawSchema, rowCount, onConfirm, onBack }: Step2Sch
   const [metrics, setMetrics] = useState<MetricConfig[]>(rawSchema.metrics);
   const [showFormula, setShowFormula] = useState(false);
 
-  // All non-date columns for reassignment
-  const allCols = [...rawSchema.dimensionCols, ...rawSchema.metrics.map(m => m.name)];
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  // All columns for reassignment, date col included so the select has a valid option
+  const allCols = [rawSchema.dateCol, ...rawSchema.dimensionCols, ...rawSchema.metrics.map(m => m.name)];
 
   function toggleDimension(col: string, checked: boolean): void {
     if (checked) {
@@ -65,7 +67,12 @@ export function Step2Schema({ rawSchema, rowCount, onConfirm, onBack }: Step2Sch
   }
 
   function addCustomMetric(metric: MetricConfig): void {
-    setMetrics(prev => [...prev, metric]);
+    if (editingIndex !== null) {
+      setMetrics(prev => prev.map((m, i) => i === editingIndex ? metric : m));
+      setEditingIndex(null);
+    } else {
+      setMetrics(prev => [...prev, metric]);
+    }
     setShowFormula(false);
   }
 
@@ -146,7 +153,7 @@ export function Step2Schema({ rawSchema, rowCount, onConfirm, onBack }: Step2Sch
       {/* Metrics */}
       <div className={styles.section}>
         <span className={styles.sectionLabel}>Metrics (analyse)</span>
-        {metrics.map(m => (
+        {metrics.map((m, idx) => (
           <div key={m.name} className={styles.columnRow}>
             <span className={styles.columnName}>{m.name}</span>
             <span className={typeBadgeClass(m.type)}>
@@ -163,6 +170,11 @@ export function Step2Schema({ rawSchema, rowCount, onConfirm, onBack }: Step2Sch
               <option value="unique">Unique</option>
             </select>
             {m.formula && <span className={styles.formulaHint}>{m.formula}</span>}
+            {m.type === 'derived' && (
+              <button className={styles.moveBtn} onClick={() => { setEditingIndex(idx); setShowFormula(true); }} aria-label={`Edit formula for ${m.name}`}>
+                Edit
+              </button>
+            )}
             <button className={styles.moveBtn} onClick={() => moveMetricToDim(m.name)} aria-label={`Move ${m.name} to dimensions`}>
               → dim
             </button>
@@ -188,7 +200,8 @@ export function Step2Schema({ rawSchema, rowCount, onConfirm, onBack }: Step2Sch
         <FormulaBuilder
           availableCols={allColsForFormula}
           onAdd={addCustomMetric}
-          onClose={() => setShowFormula(false)}
+          onClose={() => { setShowFormula(false); setEditingIndex(null); }}
+          initialMetric={editingIndex !== null ? metrics[editingIndex] : undefined}
         />
       )}
     </div>

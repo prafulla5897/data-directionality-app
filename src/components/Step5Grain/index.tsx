@@ -115,19 +115,6 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
     return computeSuggestedAnalysisGrain(rawRows, schema);
   });
 
-  const [displayGrain, setDisplayGrain] = useState<Grain>(() => {
-    if (initialGrain.displayGrain !== 'weekly') return initialGrain.displayGrain;
-    const ag = initialGrain.analysisGrain !== 'daily'
-      ? initialGrain.analysisGrain
-      : computeSuggestedAnalysisGrain(rawRows, schema);
-    return computeSuggestedDisplayGrain(computeDataSpanDays(rawRows, schema), ag);
-  });
-
-  const suggestedDisplay = useMemo(
-    () => computeSuggestedDisplayGrain(dataSpanDays, analysisGrain),
-    [dataSpanDays, analysisGrain]
-  );
-
   const [timeBudget, setTimeBudget] = useState(initialGrain.timeBudgetSeconds);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [dimWarningAccepted, setDimWarningAccepted] = useState(false);
@@ -164,17 +151,11 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
 
   function handleSetAnalysisGrain(g: Grain): void {
     setAnalysisGrain(g);
-    const newDisplay = computeSuggestedDisplayGrain(dataSpanDays, g);
-    const currentDisplayIdx = GRAIN_ORDER.indexOf(displayGrain);
-    const newAnalysisIdx = GRAIN_ORDER.indexOf(g);
-    if (currentDisplayIdx < newAnalysisIdx) setDisplayGrain(newDisplay);
   }
 
   function handleConfirm(): void {
-    onConfirm({ analysisGrain, displayGrain, timeBudgetSeconds: timeBudget });
+    onConfirm({ analysisGrain, displayGrain: computeSuggestedDisplayGrain(dataSpanDays, analysisGrain), timeBudgetSeconds: timeBudget });
   }
-
-  const displayGrainOptions = GRAIN_ORDER.filter(g => GRAIN_ORDER.indexOf(g) >= GRAIN_ORDER.indexOf(analysisGrain));
 
   return (
     <div className={styles.container}>
@@ -217,29 +198,6 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
             Daily not available — dataset exceeds 50,000 rows at daily grain. Use weekly (reduces rows by 7×) or coarser.
           </p>
         )}
-      </div>
-
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>Display grain</span>
-        <div className={styles.grainRow}>
-          {displayGrainOptions.map(g => {
-            const isActive = displayGrain === g;
-            const isRecommended = g === suggestedDisplay;
-            return (
-              <button
-                key={g}
-                className={`${styles.grainBtn} ${isActive ? styles.grainBtnActive : ''}`}
-                onClick={() => setDisplayGrain(g)}
-                aria-pressed={isActive}
-                aria-label={`${g} display grain${isRecommended ? ' — recommended' : ''}`}
-              >
-                {g.charAt(0).toUpperCase() + g.slice(1)}
-                {isRecommended && <span className={styles.recommendedBadge}>Recommended</span>}
-              </button>
-            );
-          })}
-        </div>
-        <p className={styles.hint}>Display grain must be equal to or coarser than analysis grain.</p>
       </div>
 
       {dimensionWarning && !dimWarningAccepted && (
