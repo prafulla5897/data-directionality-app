@@ -11,8 +11,23 @@
  * @example
  * pearsonR([1,2,3,4,5], [1,2,3,4,5]); // 1.0
  */
-export function pearsonR(_a: number[], _b: number[]): number {
-  throw new Error('pearsonR: not implemented — Phase 3');
+export function pearsonR(a: number[], b: number[]): number {
+  const n = a.length;
+  if (n < 2 || n !== b.length) return NaN;
+  const mA = a.reduce((s, v) => s + v, 0) / n;
+  const mB = b.reduce((s, v) => s + v, 0) / n;
+  let num = 0;
+  let denomA = 0;
+  let denomB = 0;
+  for (let i = 0; i < n; i++) {
+    const da = a[i] - mA;
+    const db = b[i] - mB;
+    num += da * db;
+    denomA += da * da;
+    denomB += db * db;
+  }
+  if (denomA === 0 || denomB === 0) return NaN;
+  return num / Math.sqrt(denomA * denomB);
 }
 
 /**
@@ -24,8 +39,15 @@ export function pearsonR(_a: number[], _b: number[]): number {
  * @example
  * directionScore([1,2,3], [1,2,3]); // 1.0
  */
-export function directionScore(_a: number[], _b: number[]): number {
-  throw new Error('directionScore: not implemented — Phase 3');
+export function directionScore(a: number[], b: number[]): number {
+  if (a.length < 2 || a.length !== b.length) return NaN;
+  let matches = 0;
+  for (let i = 0; i < a.length - 1; i++) {
+    const da = a[i + 1] - a[i];
+    const db = b[i + 1] - b[i];
+    if (Math.sign(da) === Math.sign(db)) matches++;
+  }
+  return matches / (a.length - 1);
 }
 
 /**
@@ -37,8 +59,17 @@ export function directionScore(_a: number[], _b: number[]): number {
  * @example
  * elasticityPerPeriod([100,110], [200,216])[0]; // ~0.8
  */
-export function elasticityPerPeriod(_a: number[], _b: number[]): number[] {
-  throw new Error('elasticityPerPeriod: not implemented — Phase 3');
+export function elasticityPerPeriod(a: number[], b: number[]): number[] {
+  const result: number[] = [];
+  const n = Math.min(a.length, b.length);
+  for (let i = 0; i < n - 1; i++) {
+    if (a[i] === 0 || b[i] === 0) continue;
+    const pctA = (a[i + 1] - a[i]) / a[i];
+    const pctB = (b[i + 1] - b[i]) / b[i];
+    if (pctB === 0) continue;
+    result.push(pctA / pctB);
+  }
+  return result;
 }
 
 /**
@@ -48,8 +79,9 @@ export function elasticityPerPeriod(_a: number[], _b: number[]): number[] {
  * @example
  * mean([2,4,4,4,5,5,7,9]); // 5
  */
-export function mean(_arr: number[]): number {
-  throw new Error('mean: not implemented — Phase 3');
+export function mean(arr: number[]): number {
+  if (arr.length === 0) return NaN;
+  return arr.reduce((s, v) => s + v, 0) / arr.length;
 }
 
 /**
@@ -59,8 +91,11 @@ export function mean(_arr: number[]): number {
  * @example
  * stdDev([2,4,4,4,5,5,7,9]); // ~2.0
  */
-export function stdDev(_arr: number[]): number {
-  throw new Error('stdDev: not implemented — Phase 3');
+export function stdDev(arr: number[]): number {
+  if (arr.length <= 1) return 0;
+  const m = mean(arr);
+  const variance = arr.reduce((s, v) => s + (v - m) ** 2, 0) / arr.length;
+  return Math.sqrt(variance);
 }
 
 /**
@@ -70,8 +105,11 @@ export function stdDev(_arr: number[]): number {
  * @example
  * zScore([2,4,4,4,5,5,7,9]); // sum ≈ 0
  */
-export function zScore(_arr: number[]): number[] {
-  throw new Error('zScore: not implemented — Phase 3');
+export function zScore(arr: number[]): number[] {
+  const m = mean(arr);
+  const sd = stdDev(arr);
+  if (sd === 0) return arr.map(() => 0);
+  return arr.map(v => (v - m) / sd);
 }
 
 /**
@@ -83,6 +121,10 @@ export function zScore(_arr: number[]): number[] {
  * @example
  * rollingCorr([1,2,3,4,5], [1,2,3,4,5], 3); // [1.0, 1.0, 1.0]
  */
-export function rollingCorr(_a: number[], _b: number[], _window: number): number[] {
-  throw new Error('rollingCorr: not implemented — Phase 3');
+export function rollingCorr(a: number[], b: number[], window: number): number[] {
+  const result: number[] = [];
+  for (let i = 0; i <= a.length - window; i++) {
+    result.push(pearsonR(a.slice(i, i + window), b.slice(i, i + window)));
+  }
+  return result;
 }
