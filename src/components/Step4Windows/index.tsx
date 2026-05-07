@@ -130,6 +130,9 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
     return uniqueDates.size < THRESHOLDS.MIN_BASELINE_POINTS;
   }, [rawRows, schema.dateCol, effectiveBaseline]);
 
+  const dataMinStr = dataMin ? toDateStr(dataMin) : undefined;
+  const dataMaxStr = dataMax ? toDateStr(dataMax) : undefined;
+
   function handleConfirm(): void {
     onConfirm({
       baselineStart: effectiveBaseline.start,
@@ -187,6 +190,8 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
               type="date"
               className={styles.dateInput}
               value={baselineStart}
+              min={dataMinStr}
+              max={dataMaxStr}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBaselineStart(e.target.value)}
               aria-label="Baseline start date"
             />
@@ -195,6 +200,8 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
               type="date"
               className={styles.dateInput}
               value={baselineEnd}
+              min={dataMinStr}
+              max={dataMaxStr}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBaselineEnd(e.target.value)}
               aria-label="Baseline end date"
             />
@@ -223,6 +230,8 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
               type="date"
               className={styles.dateInput}
               value={anomalyStart}
+              min={dataMinStr}
+              max={dataMaxStr}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnomalyStart(e.target.value)}
               aria-label="Anomaly window start date"
             />
@@ -231,6 +240,8 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
               type="date"
               className={styles.dateInput}
               value={anomalyEnd}
+              min={dataMinStr}
+              max={dataMaxStr}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnomalyEnd(e.target.value)}
               aria-label="Anomaly window end date"
             />
@@ -241,15 +252,15 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
       <div className={styles.summary}>{summaryText}</div>
 
       {anomalyExtendsWarning && (
-        <div className={styles.warning} role="alert">
-          Anomaly window extends beyond baseline. Results may be less reliable for periods outside the baseline.
-        </div>
+        <p className={styles.hint}>
+          Anomaly window extends beyond baseline — some periods may have limited context.
+        </p>
       )}
 
       {baselineTooShort && (
-        <div className={styles.warning} role="alert">
-          Baseline too short for reliable detection. Select a longer date range (minimum 14 data points).
-        </div>
+        <p className={styles.hint}>
+          Short baseline — results may be less reliable.
+        </p>
       )}
 
       <div className={styles.actions}>

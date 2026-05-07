@@ -88,6 +88,12 @@
   font-family: var(--font-mono);
 }
 
+.hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: var(--space-1) 0;
+}
+
 .warning {
   background: color-mix(in srgb, var(--amber) 10%, var(--bg3));
   border: 1px solid var(--amber);

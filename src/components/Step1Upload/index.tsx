@@ -59,6 +59,18 @@ export function Step1Upload({ onComplete }: Step1UploadProps): JSX.Element {
     onComplete(rows, schema, false);
   }
 
+  function clearFile1(): void {
+    setFile1State({ file: null, rows: [], schema: null });
+    setError(null);
+    if (input1Ref.current) input1Ref.current.value = '';
+  }
+
+  function clearFile2(): void {
+    setFile2State({ file: null, rows: [], schema: null });
+    setError(null);
+    if (input2Ref.current) input2Ref.current.value = '';
+  }
+
   async function handleFile1(file: File): Promise<void> {
     setError(null);
     const validation = validateFile(file);
@@ -73,7 +85,7 @@ export function Step1Upload({ onComplete }: Step1UploadProps): JSX.Element {
           if (file2State.file) {
             await triggerMerge({ file, rows, schema }, file2State);
           } else {
-            handleSingleFileDone(rows, schema);
+            setPhase('idle');
           }
         } catch (e) { setError(e instanceof Error ? e.message : 'Parse error.'); setPhase('idle'); }
       };
@@ -90,7 +102,7 @@ export function Step1Upload({ onComplete }: Step1UploadProps): JSX.Element {
       if (file2State.file && file2State.schema) {
         await triggerMerge({ file, rows, schema }, file2State);
       } else {
-        handleSingleFileDone(rows, schema);
+        setPhase('idle');
       }
     } catch (e) { setError(e instanceof Error ? e.message : 'Parse error.'); setPhase('idle'); }
   }
@@ -205,6 +217,14 @@ export function Step1Upload({ onComplete }: Step1UploadProps): JSX.Element {
                 {file1State.rows.length > 0 && (
                   <p className={styles.rowCount}>{file1State.rows.length.toLocaleString()} rows detected</p>
                 )}
+                <button
+                  className={styles.btnSecondary}
+                  style={{ fontSize: '0.8rem', padding: '4px 10px', marginTop: 'var(--space-2)' }}
+                  onClick={e => { e.stopPropagation(); clearFile1(); }}
+                  aria-label="Remove file 1"
+                >
+                  Remove
+                </button>
               </>
             : <>
                 <span className={styles.dropZoneLabel}>Drop file here or click to select</span>
@@ -220,6 +240,17 @@ export function Step1Upload({ onComplete }: Step1UploadProps): JSX.Element {
           onChange={e => { const f = e.target.files?.[0]; if (f) void handleFile1(f); e.target.value = ''; }}
         />
       </div>
+
+      {file1State.rows.length > 0 && phase === 'idle' && !file2State.file && (
+        <div className={styles.actions}>
+          <button
+            className={styles.btnPrimary}
+            onClick={() => { if (file1State.schema) handleSingleFileDone(file1State.rows, file1State.schema); }}
+          >
+            Continue to schema →
+          </button>
+        </div>
+      )}
 
       {/* File 2 drop zone */}
       <div className={styles.file2Section}>
@@ -240,7 +271,17 @@ export function Step1Upload({ onComplete }: Step1UploadProps): JSX.Element {
           onDrop={onDrop2}
         >
           {file2State.file
-            ? <span>{file2State.file.name}</span>
+            ? <>
+                <span>{file2State.file.name}</span>
+                <button
+                  className={styles.btnSecondary}
+                  style={{ fontSize: '0.8rem', padding: '4px 10px', marginTop: 'var(--space-2)' }}
+                  onClick={e => { e.stopPropagation(); clearFile2(); }}
+                  aria-label="Remove file 2"
+                >
+                  Remove
+                </button>
+              </>
             : <span>Drop second file here or click to select</span>
           }
           <input

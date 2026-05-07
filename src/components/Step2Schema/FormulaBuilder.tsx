@@ -1,6 +1,6 @@
 /**
- * Formula builder modal — 3-tier custom metric creation.
- * Tier 1: pre-built presets. Tier 2: component picker. Tier 3: free-form.
+ * Formula builder modal — 2-tier custom metric creation.
+ * Tier 1: pre-built presets. Tier 2: component picker with ÷ or × operator.
  */
 
 import { useState } from 'react';
@@ -14,37 +14,44 @@ const PREBUILT: MetricConfig[] = [
   { name: 'ROAS', type: 'derived', formula: 'revenue / spend',            components: ['revenue', 'spend'],      aggregation: 'recalculate' },
 ];
 
-type Tier = 'prebuilt' | 'picker' | 'freeform';
+type Tier = 'prebuilt' | 'picker';
+type Operator = 'divide' | 'multiply';
 
 interface FormulaBuilderProps {
   availableCols: string[];
   onAdd: (metric: MetricConfig) => void;
   onClose: () => void;
+  initialMetric?: MetricConfig;
 }
 
 /**
- * Modal for creating a custom formula metric.
- * Supports pre-built presets, component picker, and free-form expression.
- * @param props - Available columns, onAdd callback, onClose callback
+ * Modal for creating or editing a custom formula metric.
+ * Supports pre-built presets and component picker with ÷ or × operator.
+ * @param props - availableCols, onAdd callback, onClose callback, optional initialMetric for editing
  * @returns Modal JSX
  */
-export function FormulaBuilder({ availableCols, onAdd, onClose }: FormulaBuilderProps): JSX.Element {
-  const [tier, setTier] = useState<Tier>('prebuilt');
-  const [selectedPrebuilt, setSelectedPrebuilt] = useState<string>('CTR');
-  const [pickerName, setPickerName] = useState('');
-  const [numerator, setNumerator] = useState(availableCols[0] ?? '');
-  const [denominator, setDenominator] = useState(availableCols[1] ?? availableCols[0] ?? '');
-  const [multiplier, setMultiplier] = useState('1');
-  const [freeformName, setFreeformName] = useState('');
-  const [freeformExpr, setFreeformExpr] = useState('');
-  const [formError, setFormError] = useState<string | null>(null);
+export function FormulaBuilder({ availableCols, onAdd, onClose, initialMetric }: FormulaBuilderProps): JSX.Element {
+  const isEditingPrebuilt = initialMetric ? PREBUILT.some(p => p.name === initialMetric.name) : false;
 
-  function validateFreeform(expr: string): string | null {
-    const tokens = expr.match(/[a-zA-Z_][a-zA-Z0-9_]*/g) ?? [];
-    const unknown = tokens.filter(t => !availableCols.includes(t));
-    if (unknown.length > 0) return `Unknown column(s): ${unknown.join(', ')}`;
-    return null;
-  }
+  const [tier, setTier] = useState<Tier>(() => {
+    if (!initialMetric) return 'prebuilt';
+    return isEditingPrebuilt ? 'prebuilt' : 'picker';
+  });
+  const [selectedPrebuilt, setSelectedPrebuilt] = useState<string>(
+    initialMetric && isEditingPrebuilt ? initialMetric.name : 'CTR'
+  );
+  const [pickerName, setPickerName] = useState(
+    initialMetric && !isEditingPrebuilt ? initialMetric.name : ''
+  );
+  const [numerator, setNumerator] = useState(
+    initialMetric?.components?.[0] ?? availableCols[0] ?? ''
+  );
+  const [denominator, setDenominator] = useState(
+    initialMetric?.components?.[1] ?? availableCols[1] ?? availableCols[0] ?? ''
+  );
+  const [operator, setOperator] = useState<Operator>('divide');
+  const [multiplier, setMultiplier] = useState('1');
+  const [formError, setFormError] = useState<string | null>(null);
 
   function handleAdd(): void {
     setFormError(null);
@@ -53,23 +60,19 @@ export function FormulaBuilder({ availableCols, onAdd, onClose }: FormulaBuilder
       if (preset) onAdd(preset);
       return;
     }
-    if (tier === 'picker') {
-      if (!pickerName.trim()) { setFormError('Name is required.'); return; }
-      const mult = parseFloat(multiplier);
-      const formula = isNaN(mult) || mult === 1
+    if (!pickerName.trim()) { setFormError('Name is required.'); return; }
+    const mult = parseFloat(multiplier);
+    let formula: string;
+    if (operator === 'multiply') {
+      formula = isNaN(mult) || mult === 1
+        ? `${numerator} * ${denominator}`
+        : `${numerator} * ${denominator} * ${mult}`;
+    } else {
+      formula = isNaN(mult) || mult === 1
         ? `${numerator} / ${denominator}`
         : `${numerator} / ${denominator} * ${mult}`;
-      onAdd({ name: pickerName.trim(), type: 'derived', formula, components: [numerator, denominator], aggregation: 'recalculate' });
-      return;
     }
-    // freeform
-    if (!freeformName.trim()) { setFormError('Name is required.'); return; }
-    if (!freeformExpr.trim()) { setFormError('Formula is required.'); return; }
-    const err = validateFreeform(freeformExpr);
-    if (err) { setFormError(err); return; }
-    const tokens = freeformExpr.match(/[a-zA-Z_][a-zA-Z0-9_]*/g) ?? [];
-    const comps = [...new Set(tokens.filter(t => availableCols.includes(t)))];
-    onAdd({ name: freeformName.trim(), type: 'derived', formula: freeformExpr.trim(), components: comps, aggregation: 'recalculate' });
+    onAdd({ name: pickerName.trim(), type: 'derived', formula, components: [numerator, denominator], aggregation: 'recalculate' });
   }
 
   const inputStyle: React.CSSProperties = {
@@ -86,12 +89,12 @@ export function FormulaBuilder({ availableCols, onAdd, onClose }: FormulaBuilder
   return (
     <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Add custom formula">
       <div className={styles.modalBox}>
-        <h3 className={styles.modalHeading}>Add custom metric</h3>
+        <h3 className={styles.modalHeading}>{initialMetric ? 'Edit metric' : 'Add custom metric'}</h3>
 
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-          {(['prebuilt', 'picker', 'freeform'] as Tier[]).map(t => (
+          {(['prebuilt', 'picker'] as Tier[]).map(t => (
             <button key={t} style={tabStyle(tier === t)} onClick={() => { setTier(t); setFormError(null); }}>
-              {t === 'prebuilt' ? 'Pre-built' : t === 'picker' ? 'Component picker' : 'Free-form'}
+              {t === 'prebuilt' ? 'Pre-built' : 'Component picker'}
             </button>
           ))}
         </div>
@@ -108,11 +111,14 @@ export function FormulaBuilder({ availableCols, onAdd, onClose }: FormulaBuilder
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             <input placeholder="Metric name (e.g. Conversion Rate)" value={pickerName} onChange={e => setPickerName(e.target.value)} style={inputStyle} aria-label="Metric name" />
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <select value={numerator} onChange={e => setNumerator(e.target.value)} style={{ ...inputStyle, width: 'auto', flex: 1 }} aria-label="Numerator column">
+              <select value={numerator} onChange={e => setNumerator(e.target.value)} style={{ ...inputStyle, width: 'auto', flex: 1 }} aria-label="Left column">
                 {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
-              <span style={{ color: 'var(--muted)' }}>÷</span>
-              <select value={denominator} onChange={e => setDenominator(e.target.value)} style={{ ...inputStyle, width: 'auto', flex: 1 }} aria-label="Denominator column">
+              <select value={operator} onChange={e => setOperator(e.target.value as Operator)} style={{ ...inputStyle, width: 'auto' }} aria-label="Operator">
+                <option value="divide">÷</option>
+                <option value="multiply">×</option>
+              </select>
+              <select value={denominator} onChange={e => setDenominator(e.target.value)} style={{ ...inputStyle, width: 'auto', flex: 1 }} aria-label="Right column">
                 {availableCols.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               <span style={{ color: 'var(--muted)' }}>×</span>
@@ -121,21 +127,11 @@ export function FormulaBuilder({ availableCols, onAdd, onClose }: FormulaBuilder
           </div>
         )}
 
-        {tier === 'freeform' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <input placeholder="Metric name" value={freeformName} onChange={e => setFreeformName(e.target.value)} style={inputStyle} aria-label="Metric name" />
-            <input placeholder="e.g. conversions / spend * 100" value={freeformExpr} onChange={e => setFreeformExpr(e.target.value)} style={{ ...inputStyle, fontFamily: 'var(--font-mono)' }} aria-label="Formula expression" />
-            <p style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
-              Available columns: {availableCols.join(', ')}
-            </p>
-          </div>
-        )}
-
         {formError && <div className={styles.error} role="alert">{formError}</div>}
 
         <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
           <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
-          <button className={styles.btnPrimary} onClick={handleAdd}>Add metric</button>
+          <button className={styles.btnPrimary} onClick={handleAdd}>{initialMetric ? 'Update metric' : 'Add metric'}</button>
         </div>
       </div>
     </div>
