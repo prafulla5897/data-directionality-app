@@ -1,0 +1,129 @@
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.backBtn {
+  background: none;
+  color: var(--teal);
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-ui);
+  align-self: flex-start;
+}
+
+.backBtn:hover { text-decoration: underline; }
+
+.heading {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+}
+
+.badgeCritical { background: rgba(255,107,91,0.15); color: var(--critical); }
+.badgeWarning  { background: rgba(245,166,35,0.15); color: var(--warning); }
+.badgeInfo     { background: rgba(91,143,249,0.15); color: var(--info); }
+
+.summary {
+  background: var(--bg2);
+  border-radius: var(--r2);
+  padding: 1.25rem;
+  font-size: 0.925rem;
+  color: var(--text);
+  line-height: 1.7;
+  border-left: 4px solid var(--teal);
+}
+
+.sectionLabel {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+}
+
+.chartCard {
+  background: var(--bg2);
+  border-radius: var(--r2);
+  padding: 1.25rem;
+}
+
+.contextCard {
+  background: var(--bg2);
+  border-radius: var(--r2);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contextRow {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.contextKey {
+  color: var(--muted);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.contextVal {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.drillSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.drillLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin: 0 0 0.25rem;
+}
+
+.drillBtn {
+  background: var(--bg2);
+  color: var(--teal);
+  border: 1px solid var(--bg3);
+  border-radius: var(--r);
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  text-align: left;
+}
+
+.drillBtn:hover {
+  background: var(--bg3);
+}
+
+@media (max-width: 768px) {
+  .container { padding: 1rem; gap: 1.5rem; }
+  .contextRow { flex-direction: column; gap: 0.25rem; }
+}

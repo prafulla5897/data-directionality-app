@@ -18,8 +18,8 @@ Read these files in this order before writing any code:
 2. CLAUDE.md        — how to code it (TypeScript standards, rules, constants)
 3. PHASES.md        — Phase [N] section only (current phase scope + criteria)
 
-Current phase: Phase 4 — Results Dashboard
-Files relevant to this phase: [list paths]
+Current phase: Phase 5 — Polish & Hardening
+Files relevant to this phase: all source files
 ```
 
 ---
@@ -48,7 +48,7 @@ Do NOT paste full file contents — reference by path and let Claude Code read t
 | 1 — Upload + Schema | ✅ Complete | 2026-05-06 | tsc clean, build passes, lint clean; parser/schemaDetector/fileMerger implemented; Step1Upload (drag-drop, size warning, two-file merge) and Step2Schema (reassignment, 3-tier formula builder) complete |
 | 2 — Scope + Windows + Grain | ✅ Complete | 2026-05-07 | tsc clean, build passes, lint clean; Step3Scope (campaign selector, date range, live counter), Step4Windows (baseline + anomaly window with soft notes), Step5Grain (noise-to-signal auto-detect, display grain auto-computed, advanced time budget slider, dimension limit warning) all implemented; App.tsx wires steps 3–5 with conditional Step 3 logic. 12 post-phase bugs fixed: date column dropdown (Step2), dimensions section (Step2), FormulaBuilder free-form removed, × operator added to picker, edit button for derived metrics, file clear buttons (Step1), large-file warning stays on Step1 until user continues, date picker min/max constraints (Step4), anomaly summary null-safe (Step4), baseline-too-short and anomaly-extends warnings converted to soft hints, display grain UI removed from Step5 (auto-computed from analysis grain + data span) |
 | 3 — Analysis Engine | ✅ Complete | 2026-05-07 | tsc clean, build passes, lint clean; analysis.ts (pearsonR, directionScore, elasticityPerPeriod, mean, stdDev, zScore, rollingCorr), aggregator.ts (buildSeries + generateDimensionSubsets), ruleEngine.ts (generateAnomalies with direction + elasticity anomaly detection, plain-English titles/bodies) all implemented; 47 unit tests pass (analysis.test.ts + ruleEngine.test.ts); all Phase 3 acceptance criteria met |
-| 4 — Dashboard | ⬜ Not started | — | — |
+| 4 — Dashboard | ✅ Complete | 2026-05-07 | tsc clean, build passes, lint clean, 47 unit tests pass; Step6Progress (progress bar + cancel), Step7Results (health snapshot, anomaly cards grouped by display grain, severity filter, methodology accordion, markdown export), Step8Drilldown (scatter + time-series Chart.js charts with anomaly shading, dimension context, drill navigation) all implemented; App.tsx wires chunked async analysis execution with progress tracking |
 | 5 — Polish | ⬜ Not started | — | — |
 
 ---
