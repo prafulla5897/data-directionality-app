@@ -170,6 +170,7 @@ export interface AppState {
     selectedDimensions: string[];
     dateRangeStart: Date | null;
     dateRangeEnd: Date | null;
+    aggregateOther: boolean;     // whether unselected campaigns roll up as "Other"
   };
   windowConfig: {
     baselineStart: Date | null;
@@ -218,8 +219,27 @@ Type:
      DD-MMM-YYYY, Excel serial numbers
    - Pick format where >90% of rows parse successfully
    - If none: reject "No date column found"
-4. Output: rows[], detected schema candidate
+4. After parsing: stay on Step 1 — show filename, row count, and a
+   "Continue to schema →" button. Do NOT auto-advance.
+5. Output: rows[], detected schema candidate
 ```
+
+**Step 1 UI after a file is loaded:**
+```
+[  filename.csv             ]
+   12,345 rows detected
+   [Remove]
+
+[Continue to schema →]       ← only appears when file 1 is parsed and idle
+
+Second file (optional):
+[  drop second file here   ]
+   (or Remove if loaded)
+```
+
+**Remove buttons:** Both the primary and secondary file slots show a "Remove"
+button once a file is loaded. Clicking Remove clears the file state without
+advancing or triggering any other action.
 
 **Two-file merge backend:**
 ```
@@ -254,7 +274,7 @@ Known unique metrics (reach, unique_users, unique_visitors) → type: unique
 
 **UI:**
 ```
-Date column:    [date ▼]
+Date column:    [date ▼]        ← includes the detected date col as an option
 
 Dimensions (segment by):
   ☑ campaign      3 unique values
@@ -267,17 +287,25 @@ Metrics (analyse):
   ☑ spend         [Sum ▼]
   ☑ impressions   [Sum ▼]
   ☑ clicks        [Sum ▼]
-  ☑ CTR           [Derived: clicks ÷ impressions × 100]
+  ☑ CTR           [Derived: clicks ÷ impressions × 100]  [Edit]
   ☐ reach         [Unique — used as-is, no aggregation]
-  + Add custom formula (3 tiers: pre-built / component picker / free-form)
+  + Add custom formula
+
+  Edit button appears on every derived metric row and reopens the
+  FormulaBuilder pre-filled with that metric's name and components.
+  Saving replaces the metric in-place rather than appending a new one.
 ```
 
-**Custom formula tiers:**
+**Custom formula tiers (2 tiers only — free-form removed):**
 ```
 Tier 1 — pre-built: CTR, CPM, CPC, ROAS (select from dropdown)
-Tier 2 — component picker: numerator [col ▼] / [÷] / denominator [col ▼] × [constant]
-Tier 3 — free-form text: user types "conversions / spend * 100"
-         Validated: all referenced columns must exist in dataset
+Tier 2 — component picker:
+  [metric name input]
+  [col ▼]  [÷ or × ▼]  [col ▼]  × [constant]
+  Operator dropdown lets user choose ÷ (divide) or × (multiply).
+  Formula generated:
+    divide: numerator / denominator [* constant if ≠ 1]
+    multiply: left * right [* constant if ≠ 1]
 ```
 
 **Sparsity:** Handled silently. Missing campaign-date combos skipped in analysis.
@@ -336,24 +364,31 @@ Your data spans: Jan 1, 2025 – Dec 31, 2025
 Baseline period (define "normal"):
   ● Use all data  (Jan 1 – Dec 31, 2025)
   ○ Custom: [Jan 1, 2025] → [Nov 30, 2025]
+            ↑ date pickers are constrained to dataset min/max
 
 Anomaly window (what to check):
   ○ Last 1 week
   ● Last 1 month  ← default
   ○ Last 3 months
   ○ Custom: [start] → [end]
+            ↑ date pickers are constrained to dataset min/max
 
 Summary: Baseline Jan 1–Dec 31 | Anomalies Dec 1–Dec 31
+
+[soft hint if applicable]
+[Back]  [Continue]           ← Continue is never disabled
 ```
 
-**Validation:**
+**Validation (soft hints only — never block Continue):**
 ```
 If anomaly_window extends beyond baseline_window:
-  → warn "Results may be less reliable for periods outside baseline"
-  → allow user to override and continue
+  → soft note below summary: "Anomaly window extends beyond baseline
+    — some periods may have limited context."
+  → Continue remains enabled
 
 If baseline has < 14 data points at chosen grain:
-  → warn "Baseline too short for reliable detection"
+  → soft note below summary: "Short baseline — results may be less reliable."
+  → Continue remains enabled
 ```
 
 ---
@@ -374,8 +409,11 @@ Example:
   Monthly:  variance  1,800 → ratio 6.94 (over-smoothed)
 ```
 
-**Auto-detect display grain:**
+**Auto-detect display grain (internal — not user-configurable):**
 ```
+Display grain is computed automatically when the user clicks "Run Analysis"
+and is never shown in the UI. Formula (same as before):
+
 data_span < 30 days     → display = analysis grain
 data_span 30–90 days    → display = weekly
 data_span 90–365 days   → display = monthly
@@ -410,9 +448,8 @@ Analysis grain:
   [Daily — disabled if >50k*] [Weekly ✓] [Monthly] [Quarterly]
   ℹ Recommended: weekly
 
-Display grain:
-  [Weekly] [Monthly ✓] [Quarterly]
-  ℹ Recommended: monthly
+  (Display grain is NOT shown — it is auto-computed from analysis grain
+   and data span when the user clicks "Run Analysis".)
 
 ▼ Advanced options (collapsed by default)
   Processing time limit: [slider 30s–300s, default 60s]
@@ -662,7 +699,7 @@ export const CHART_COLORS = [
 | File > 50MB | "File too large. Please reduce file size." |
 | No date column | "No date column found. Ensure one column contains dates." |
 | No numeric columns | "No numeric columns detected. Ensure your file has metric data." |
-| < 14 baseline points | "Baseline too short. Select a longer date range." |
+| < 14 baseline points | Soft hint: "Short baseline — results may be less reliable." (does not block Continue) |
 | Campaign missing from anomaly window | "Retargeting has no data for the selected period. Excluded from results." |
 | Two-file merge: zero matching rows | "No matching rows found between the two files. Check dimension column mapping." |
 | Single metric only | Correlation section shows: "Need ≥ 2 metrics for comparison analysis." |
