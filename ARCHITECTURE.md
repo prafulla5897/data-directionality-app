@@ -79,7 +79,7 @@ marketing-signal/
 │   │   ├── Step2Schema/          ← column config UI
 │   │   ├── Step3Scope/           ← dimension + date range (only if >50k rows)
 │   │   ├── Step4Windows/         ← baseline + anomaly window pickers
-│   │   ├── Step5Grain/           ← analysis + display grain selection
+│   │   ├── Step5Grain/           ← analysis grain selection; display grain auto-computed
 │   │   ├── Step6Progress/        ← analysis running UI
 │   │   ├── Step7Results/         ← dashboard: health snapshot + anomaly cards
 │   │   └── Step8Drilldown/       ← scatter + time-series + plain English detail
@@ -228,18 +228,21 @@ Type:
 ```
 [  filename.csv             ]
    12,345 rows detected
-   [Remove]
+   [Remove]                  ← clears file state, stays on Step 1
 
-[Continue to schema →]       ← only appears when file 1 is parsed and idle
+[Continue to schema →]       ← appears when file 1 is parsed, phase is idle,
+                                and NO second file is loaded (two-file flow
+                                uses the merge mapping screen instead)
 
-Second file (optional):
+Second file (optional — for merging two data sources):
 [  drop second file here   ]
-   (or Remove if loaded)
+   or [filename2.csv / Remove] if loaded
 ```
 
-**Remove buttons:** Both the primary and secondary file slots show a "Remove"
-button once a file is loaded. Clicking Remove clears the file state without
-advancing or triggering any other action.
+**Remove buttons:** Both file slots show a "Remove" button once a file is
+loaded. Clicking Remove calls `clearFile1()` / `clearFile2()`, resets that
+slot's state to `{ file: null, rows: [], schema: null }`, and clears any
+error — without advancing or re-triggering parse.
 
 **Two-file merge backend:**
 ```
@@ -393,7 +396,7 @@ If baseline has < 14 data points at chosen grain:
 
 ---
 
-### Step 5 — Analysis Grain & Display Grain
+### Step 5 — Analysis Grain (display grain is internal)
 
 **Auto-detect analysis grain:**
 ```
