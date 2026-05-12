@@ -6,6 +6,7 @@ import { useState, useCallback } from 'react';
 import type { Anomaly, Schema, AppState, Grain } from '../../types/index.js';
 import { AnomalyCard } from './AnomalyCard.js';
 import { HealthSnapshot } from './HealthSnapshot.js';
+import { PrintView } from './PrintView.js';
 import styles from './Step7Results.module.css';
 
 interface Step7ResultsProps {
@@ -56,39 +57,6 @@ function getGroupHeading(key: string, grain: Grain): string {
   }
 }
 
-function buildMarkdown(anomalies: Anomaly[], windowConfig: AppState['windowConfig']): string {
-  const today = new Date().toISOString().slice(0, 10);
-  const lines: string[] = [
-    '# Marketing Signal — Analysis Report',
-    `Generated: ${today}`,
-    `Baseline: ${fmtDate(windowConfig.baselineStart)} – ${fmtDate(windowConfig.baselineEnd)}`,
-    `Anomaly window: ${fmtDate(windowConfig.anomalyStart)} – ${fmtDate(windowConfig.anomalyEnd)}`,
-    '',
-  ];
-  const groups: Record<string, Anomaly[]> = { critical: [], warning: [], info: [] };
-  for (const a of anomalies) groups[a.severity].push(a);
-  const sections: [string, Anomaly[]][] = [
-    ['## Critical anomalies', groups.critical],
-    ['## Warnings', groups.warning],
-    ['## Info', groups.info],
-  ];
-  for (const [header, items] of sections) {
-    if (items.length === 0) continue;
-    lines.push(header, '');
-    for (const a of items) {
-      const dimStr = Object.entries(a.dimensionValues).map(([k, v]) => `${k}: ${v}`).join(', ');
-      lines.push(
-        `### ${a.title}`,
-        a.body,
-        `- Dimension: ${dimStr || 'All'}`,
-        `- Metrics: ${a.metricPair[0]} ↔ ${a.metricPair[1]}`,
-        `- Period: ${fmtDate(a.periodStart)} – ${fmtDate(a.periodEnd)}`,
-        '',
-      );
-    }
-  }
-  return lines.join('\n');
-}
 
 /**
  * Results dashboard with health snapshot, anomaly cards grouped by display grain,
@@ -125,16 +93,7 @@ export function Step7Results({
   }, [anomalies]);
 
   function handleExport(): void {
-    const md = buildMarkdown(anomalies, windowConfig);
-    const blob = new Blob([md], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `marketing-signal-${new Date().toISOString().slice(0, 10)}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    window.print();
   }
 
   return (
@@ -154,7 +113,7 @@ export function Step7Results({
       <section aria-labelledby="cards-heading">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <p id="cards-heading" className={styles.sectionHeading} style={{ margin: 0 }}>Anomalies</p>
-          <div className={styles.filterBar} role="group" aria-label="Filter by severity">
+          <div className={`${styles.filterBar} noPrint`} role="group" aria-label="Filter by severity">
             {(['all', 'critical', 'warning', 'info'] as FilterSeverity[]).map(f => (
               <button
                 key={f}
@@ -185,7 +144,7 @@ export function Step7Results({
 
       <div className={styles.accordion}>
         <button
-          className={styles.accordionTrigger}
+          className={`${styles.accordionTrigger} noPrint`}
           onClick={() => setAccordionOpen(v => !v)}
           aria-expanded={accordionOpen}
         >
@@ -210,12 +169,14 @@ export function Step7Results({
         )}
       </div>
 
-      <div className={styles.footer}>
+      <div className={`${styles.footer} noPrint`}>
         <button className={styles.btnSecondary} onClick={onBack}>Back</button>
         <button className={styles.btnSecondary} onClick={onChangeWindow}>Change window</button>
         <button className={styles.btnSecondary} onClick={onNewFile}>New file</button>
-        <button className={styles.btnPrimary} onClick={handleExport}>Export insights as .md</button>
+        <button className={styles.btnPrimary} onClick={handleExport}>Export as PDF</button>
       </div>
+
+      <PrintView anomalies={anomalies} windowConfig={windowConfig} />
     </div>
   );
 }

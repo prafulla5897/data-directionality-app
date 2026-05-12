@@ -35,6 +35,7 @@ const INITIAL_STATE: AppState = {
     analysisGrain: 'daily',
     displayGrain: 'weekly',
     timeBudgetSeconds: CONFIG.DEFAULT_TIME_BUDGET_SECONDS,
+    weekStartDay: 1,
   },
   seriesList: [],
   baselineStats: [],
@@ -182,7 +183,7 @@ export function App(): JSX.Element {
         setState(prev => ({ ...prev, seriesList: allSeries, anomalies, step: 7 }));
         return;
       }
-      const chunk = buildSeries(filteredRows, schema, grainConfig.analysisGrain, subsets[idx]);
+      const chunk = buildSeries(filteredRows, schema, grainConfig.analysisGrain, subsets[idx], grainConfig.weekStartDay);
       allSeries = allSeries.concat(chunk);
       idx++;
       setProgressCurrent(idx);

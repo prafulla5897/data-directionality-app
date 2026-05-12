@@ -13,6 +13,7 @@ import {
   Filler,
 } from 'chart.js';
 import './styles/global.css';
+import './styles/print.css';
 import { App } from './App.js';
 
 Chart.register(

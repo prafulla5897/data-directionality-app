@@ -88,29 +88,49 @@ function buildBody(
   mA: string,
   mB: string,
   persistencePeriods: number,
-  dScore: number
+  dScore: number,
+  aVals: (number | null)[],
+  bVals: (number | null)[],
+  runStart: number,
+  anomalyIdx: number[],
 ): string {
   const pWord = persistencePeriods === 1 ? 'period' : `${persistencePeriods} consecutive periods`;
+  const i0 = anomalyIdx[runStart];
+  const i1 = anomalyIdx[runStart + 1] ?? i0;
+  const a0 = aVals[i0]; const a1 = aVals[i1];
+  const b0 = bVals[i0]; const b1 = bVals[i1];
 
   if (severity === 'critical') {
     const togetherPct = Math.round(dScore * 100);
-    return (
-      `${mA} and ${mB} moved in opposite directions. ` +
+    if (a0 !== null && a1 !== null && a0 !== 0 && b0 !== null && b0 !== 0 && b1 !== null) {
+      const aDir = a1 >= a0 ? 'increased' : 'dropped';
+      const bDir = b1 >= b0 ? 'increased' : 'dropped';
+      const aPct = Math.round(Math.abs((a1 - a0) / a0) * 100);
+      const bPct = Math.round(Math.abs((b1 - b0) / b0) * 100);
+      return `${mA} ${aDir} ${aPct}% while ${mB} ${bDir} ${bPct}%. ` +
+        `Historically these move the same way ${togetherPct}% of the time. ` +
+        `This pattern continued for ${pWord}.`;
+    }
+    return `${mA} and ${mB} moved in opposite directions. ` +
       `Historically they move the same way ${togetherPct}% of the time. ` +
-      `This lasted ${pWord}.`
-    );
+      `This lasted ${pWord}.`;
   }
   if (severity === 'warning') {
-    return (
-      `${mA} changed by an unusually different amount relative to ${mB}. ` +
+    if (a0 !== null && a1 !== null && a0 !== 0 && b0 !== null && b0 !== 0 && b1 !== null) {
+      const aDir = a1 >= a0 ? 'increased' : 'dropped';
+      const bDir = b1 >= b0 ? 'increased' : 'dropped';
+      const aPct = Math.round(Math.abs((a1 - a0) / a0) * 100);
+      const bPct = Math.round(Math.abs((b1 - b0) / b0) * 100);
+      return `${mA} ${aDir} ${aPct}% while ${mB} ${bDir} ${bPct}% — an unusually large difference. ` +
+        `This is out of the ordinary compared to historical patterns. ` +
+        `This continued for ${pWord}.`;
+    }
+    return `${mA} changed by an unusually different amount relative to ${mB}. ` +
       `This is out of the ordinary compared to historical patterns. ` +
-      `This continued for ${pWord}.`
-    );
+      `This continued for ${pWord}.`;
   }
-  return (
-    `${mA} and ${mB} moved in an unexpected way during this period. ` +
-    `This is out of the ordinary compared to historical data.`
-  );
+  return `${mA} and ${mB} moved in an unexpected way during this period. ` +
+    `This is out of the ordinary compared to historical data.`;
 }
 
 function makeAnomaly(
@@ -142,7 +162,7 @@ function makeAnomaly(
     periodEnd,
     persistencePeriods: run.length,
     title: buildTitle(severity, mA, mB, series.values[mA], series.values[mB], run.start, anomalyIdx),
-    body: buildBody(severity, mA, mB, run.length, dScore),
+    body: buildBody(severity, mA, mB, run.length, dScore, series.values[mA], series.values[mB], run.start, anomalyIdx),
     stats: {
       directionScore: dScore,
       meanElasticity: mElasticity,

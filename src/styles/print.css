@@ -1,0 +1,97 @@
+/* Utility classes for print/screen visibility control */
+.noPrint { /* visible by default */ }
+
+.printOnly {
+  display: none;
+}
+
+/* ── @media print ─────────────────────────────────────────── */
+@media print {
+  /* Base overrides */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11pt;
+  }
+
+  /* Utility toggles */
+  .noPrint {
+    display: none !important;
+  }
+
+  .printOnly {
+    display: block !important;
+  }
+
+  /* Print header */
+  .printHeader {
+    margin-bottom: 20pt;
+    padding-bottom: 10pt;
+    border-bottom: 2px solid #333;
+  }
+
+  .printHeader h1 {
+    font-size: 18pt;
+    margin-bottom: 6pt;
+  }
+
+  .printHeader p {
+    font-size: 9pt;
+    color: #555;
+    margin: 2pt 0;
+  }
+
+  /* Severity section headings */
+  .printSectionHeading {
+    font-size: 13pt;
+    font-weight: bold;
+    margin: 16pt 0 8pt;
+    padding-bottom: 4pt;
+    border-bottom: 1px solid #ccc;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Page break before warning and info sections */
+  .printPageBreak {
+    page-break-before: always;
+  }
+
+  /* Individual print card */
+  .printCard {
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
+    border-left: 4px solid #999;
+    padding: 8pt 10pt;
+    margin-bottom: 8pt;
+    border-radius: 2pt;
+  }
+
+  .printCardCritical { border-left-color: #e53e3e; }
+  .printCardWarning  { border-left-color: #d69e2e; }
+  .printCardInfo     { border-left-color: #3182ce; }
+
+  .printCardMeta {
+    font-size: 8pt;
+    color: #666;
+    margin-bottom: 4pt;
+  }
+
+  .printCardTitle {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 4pt;
+  }
+
+  .printCardBody {
+    font-size: 10pt;
+    color: #333;
+    line-height: 1.5;
+  }
+}

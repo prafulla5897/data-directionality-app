@@ -18,7 +18,7 @@ interface Step4WindowsProps {
 }
 
 type BaselineMode = 'all' | 'custom';
-type AnomalyMode = '1week' | '1month' | '3months' | 'custom';
+type AnomalyMode = '7days' | 'month-to-date' | 'custom';
 
 interface AnomalyModeOption {
   value: AnomalyMode;
@@ -26,9 +26,8 @@ interface AnomalyModeOption {
 }
 
 const ANOMALY_MODES: AnomalyModeOption[] = [
-  { value: '1week', label: 'Last 1 week' },
-  { value: '1month', label: 'Last 1 month' },
-  { value: '3months', label: 'Last 3 months' },
+  { value: '7days', label: 'Last 7 days' },
+  { value: 'month-to-date', label: 'Month to date' },
   { value: 'custom', label: 'Custom' },
 ];
 
@@ -70,7 +69,7 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
   );
 
   const [anomalyMode, setAnomalyMode] = useState<AnomalyMode>(() =>
-    initialWindow.anomalyStart != null ? 'custom' : '1month'
+    initialWindow.anomalyStart != null ? 'custom' : 'month-to-date'
   );
   const [anomalyStart, setAnomalyStart] = useState(
     initialWindow.anomalyStart ? toDateStr(initialWindow.anomalyStart) : ''
@@ -90,19 +89,12 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
   const effectiveAnomaly = useMemo(() => {
     if (!dataMax) return { start: null, end: dataMax };
     const end = dataMax;
-    if (anomalyMode === '1week') {
-      const s = new Date(end.getTime());
-      s.setDate(s.getDate() - 7);
+    if (anomalyMode === '7days') {
+      const s = new Date(end.getTime() - 7 * 86_400_000);
       return { start: s, end };
     }
-    if (anomalyMode === '1month') {
-      const s = new Date(end.getTime());
-      s.setDate(s.getDate() - 30);
-      return { start: s, end };
-    }
-    if (anomalyMode === '3months') {
-      const s = new Date(end.getTime());
-      s.setDate(s.getDate() - 90);
+    if (anomalyMode === 'month-to-date') {
+      const s = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1));
       return { start: s, end };
     }
     return {
@@ -221,7 +213,7 @@ export function Step4Windows({ rawRows, schema, initialWindow, onConfirm, onBack
               onChange={() => setAnomalyMode(value)}
               aria-label={label}
             />
-            <span>{label}{value === '1month' ? ' — default' : ''}</span>
+            <span>{label}{value === 'month-to-date' ? ' — default' : ''}</span>
           </label>
         ))}
         {anomalyMode === 'custom' && (

@@ -43,9 +43,12 @@ export function ScatterChart({ anomaly, series }: ScatterChartProps): JSX.Elemen
     for (let i = 0; i < series.dates.length; i++) {
       const av = aVals[i]; const bv = bVals[i];
       if (av === null || bv === null) continue;
+      // All points shown as baseline; anomaly window also overlaid in red on top
+      baseline.push({ x: av, y: bv });
       const d = series.dates[i];
-      const inAnomaly = d >= anomaly.periodStart && d <= anomaly.periodEnd;
-      (inAnomaly ? anomalyPts : baseline).push({ x: av, y: bv });
+      if (d >= anomaly.periodStart && d <= anomaly.periodEnd) {
+        anomalyPts.push({ x: av, y: bv });
+      }
     }
 
     chartRef.current = new Chart(canvasRef.current, {

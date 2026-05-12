@@ -35,15 +35,15 @@ function parseRawDate(val: string | number | null, dateFormat: string): Date | n
   return isNaN(d.getTime()) ? null : d;
 }
 
-function grainKey(date: Date, grain: Grain): string {
+function grainKey(date: Date, grain: Grain, weekStartDay: 0 | 1 = 1): string {
   switch (grain) {
     case 'daily':
       return date.toISOString().slice(0, 10);
     case 'weekly': {
       const d = new Date(date.getTime());
       const day = d.getUTCDay();
-      // ISO week: Monday = start of week
-      const diff = day === 0 ? -6 : 1 - day;
+      // weekStartDay 1 = Monday, 0 = Sunday
+      const diff = weekStartDay === 1 ? (day === 0 ? -6 : 1 - day) : -day;
       d.setUTCDate(d.getUTCDate() + diff);
       return d.toISOString().slice(0, 10);
     }
@@ -177,15 +177,17 @@ export function generateDimensionSubsets(dimensions: string[]): string[][] {
  * @param schema - Confirmed schema with metric types and formulas
  * @param grain - Time granularity for aggregation
  * @param dimensions - Selected dimension column names
+ * @param weekStartDay - 0 = Sunday, 1 = Monday (default). Only affects weekly grain.
  * @returns Array of Series objects, one per unique dimension combination
  * @example
- * const series = buildSeries(rows, schema, 'weekly', ['campaign']);
+ * const series = buildSeries(rows, schema, 'weekly', ['campaign'], 1);
  */
 export function buildSeries(
   rows: RawRow[],
   schema: Schema,
   grain: Grain,
-  dimensions: string[]
+  dimensions: string[],
+  weekStartDay: 0 | 1 = 1,
 ): Series[] {
   type GrainMap = Map<string, RawRow[]>;
   const groups = new Map<string, GrainMap>();
@@ -203,7 +205,7 @@ export function buildSeries(
     const dimKey = dimensions.length === 0
       ? '__all__'
       : dimensions.map(d => dimValues[d]).join('\x00');
-    const gKey = grainKey(date, grain);
+    const gKey = grainKey(date, grain, weekStartDay);
 
     if (!groups.has(dimKey)) {
       groups.set(dimKey, new Map());

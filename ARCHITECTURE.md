@@ -583,7 +583,7 @@ No formulas. No Greek letters. No jargon.
 
 **Footer:**
 ```
-[Export insights as .md]  [Change window]  [New file]
+[Export as PDF]  [Change window]  [New file]
 [Back] available on every step throughout the app
 ```
 

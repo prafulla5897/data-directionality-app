@@ -116,6 +116,7 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
   });
 
   const [timeBudget, setTimeBudget] = useState(initialGrain.timeBudgetSeconds);
+  const [weekStartDay, setWeekStartDay] = useState<0 | 1>(initialGrain.weekStartDay ?? 1);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [dimWarningAccepted, setDimWarningAccepted] = useState(false);
 
@@ -154,7 +155,12 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
   }
 
   function handleConfirm(): void {
-    onConfirm({ analysisGrain, displayGrain: computeSuggestedDisplayGrain(dataSpanDays, analysisGrain), timeBudgetSeconds: timeBudget });
+    onConfirm({
+      analysisGrain,
+      displayGrain: computeSuggestedDisplayGrain(dataSpanDays, analysisGrain),
+      timeBudgetSeconds: timeBudget,
+      weekStartDay,
+    });
   }
 
   return (
@@ -197,6 +203,23 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
           <p className={styles.hint}>
             Daily not available — dataset exceeds 50,000 rows at daily grain. Use weekly (reduces rows by 7×) or coarser.
           </p>
+        )}
+        {analysisGrain === 'weekly' && (
+          <div className={styles.weekStartRow}>
+            <span className={styles.sectionLabel}>Week starts on</span>
+            <div className={styles.grainRow}>
+              {([0, 1] as const).map(day => (
+                <button
+                  key={day}
+                  className={`${styles.grainBtn} ${weekStartDay === day ? styles.grainBtnActive : ''}`}
+                  onClick={() => setWeekStartDay(day)}
+                  aria-pressed={weekStartDay === day}
+                >
+                  {day === 0 ? 'Sunday' : 'Monday'}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
