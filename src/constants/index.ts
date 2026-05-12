@@ -13,6 +13,8 @@ export const THRESHOLDS = {
   MIN_BASELINE_POINTS: 14,
   /** Minimum fraction of rows that must parse for a date format to be accepted */
   DATE_PARSE_MIN_SUCCESS: 0.9,
+  /** Min absolute fractional change (0.05 = 5%) for elasticity anomaly to fire */
+  MIN_ANOMALY_PCT_CHANGE: 0.05,
 } as const;
 
 export const CONFIG = {

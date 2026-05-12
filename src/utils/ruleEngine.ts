@@ -239,10 +239,13 @@ export function generateAnomalies(
             const pA = (a1 - a0) / a0;
             const pB = (b1 - b0) / b0;
             if (pB !== 0) {
-              actE = pA / pB;
-              if (sElasticity > 0) {
-                sigma = Math.abs(actE - mElasticity) / sElasticity;
-                eBroke = sigma > THRESHOLDS.SIGMA_THRESHOLD;
+              // Skip if both metrics barely moved — elasticity ratio is noise at this scale
+              if (Math.abs(pA) >= THRESHOLDS.MIN_ANOMALY_PCT_CHANGE || Math.abs(pB) >= THRESHOLDS.MIN_ANOMALY_PCT_CHANGE) {
+                actE = pA / pB;
+                if (sElasticity > 0) {
+                  sigma = Math.abs(actE - mElasticity) / sElasticity;
+                  eBroke = sigma > THRESHOLDS.SIGMA_THRESHOLD;
+                }
               }
             }
           }

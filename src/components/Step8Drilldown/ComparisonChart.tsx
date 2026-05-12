@@ -41,7 +41,10 @@ function computeStats(series: Series, metric: string, anomaly: Anomaly): MetricS
     if (v === null || v === undefined) continue;
     if (d < anomaly.periodStart) {
       baselineVals.push(v as number);
-    } else if (d >= anomaly.periodStart && d < anomaly.periodEnd) {
+    } else if (
+      d >= anomaly.periodStart &&
+      (anomaly.periodEnd > anomaly.periodStart ? d < anomaly.periodEnd : d.getTime() === anomaly.periodStart.getTime())
+    ) {
       anomalyVals.push(v as number);
     }
   }
