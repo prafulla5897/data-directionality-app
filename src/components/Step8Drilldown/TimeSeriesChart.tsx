@@ -289,8 +289,8 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
         />
       </div>
       {relative && (
-        <p style={{ fontSize: '0.75rem', color: 'rgba(232,230,225,0.45)', margin: '0.4rem 0 0', lineHeight: 1.4 }}>
-          Each metric scaled so its baseline average = 100. When lines diverge, the metrics are decoupling — that is the anomaly.
+        <p style={{ fontSize: '0.75rem', color: 'rgba(232,230,225,0.5)', margin: '0.4rem 0 0', lineHeight: 1.6 }}>
+          Each metric is re-scaled so its own baseline average = 100. Example: if impressions averaged 3.4M during the baseline, a week with 4.1M shows as 121 and a week with 3.0M shows as 88. This lets two metrics with very different magnitudes be compared side-by-side — when the lines diverge, they are no longer moving proportionally. Calculated as: (value ÷ baseline average) × 100.
         </p>
       )}
     </div>

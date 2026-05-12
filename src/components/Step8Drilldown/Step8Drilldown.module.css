@@ -123,6 +123,29 @@
   background: var(--bg3);
 }
 
+.statTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  color: rgba(232,230,225,0.85);
+}
+
+.statTable th {
+  text-align: left;
+  color: rgba(232,230,225,0.45);
+  font-weight: 500;
+  padding: 0.25rem 0.5rem 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statTable td {
+  padding: 0.4rem 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
 @media (max-width: 768px) {
   .container { padding: 1rem; gap: 1.5rem; }
   .contextRow { flex-direction: column; gap: 0.25rem; }

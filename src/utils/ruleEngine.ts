@@ -102,12 +102,14 @@ function buildBody(
   const bCurr = iCurr < bVals.length ? bVals[iCurr] : null;
   const aPrev = iPrev >= 0 ? aVals[iPrev] : null;
   const bPrev = iPrev >= 0 ? bVals[iPrev] : null;
+  const rawPctA = (aCurr !== null && aPrev !== null && aPrev !== 0) ? (aCurr - aPrev) / Math.abs(aPrev) * 100 : null;
+  const rawPctB = (bCurr !== null && bPrev !== null && bPrev !== 0) ? (bCurr - bPrev) / Math.abs(bPrev) * 100 : null;
 
   // Sentence 1: what happened
   let s1: string;
-  if (aCurr !== null && bCurr !== null && aPrev !== null && bPrev !== null && aPrev !== 0 && bPrev !== 0) {
-    const pctA = Math.round((aCurr - aPrev) / Math.abs(aPrev) * 100);
-    const pctB = Math.round((bCurr - bPrev) / Math.abs(bPrev) * 100);
+  if (rawPctA !== null && rawPctB !== null) {
+    const pctA = Math.round(rawPctA);
+    const pctB = Math.round(rawPctB);
     const descA = Math.abs(pctA) < 2 ? `${mA} was roughly flat` : `${mA} ${pctA < 0 ? 'fell' : 'rose'} ${Math.abs(pctA)}%`;
     const descB = Math.abs(pctB) < 2 ? `${mB} barely moved` : `${mB} ${pctB < 0 ? 'fell' : 'rose'} ${Math.abs(pctB)}%`;
     s1 = `${descA} while ${descB}.`;
@@ -119,11 +121,14 @@ function buildBody(
     s1 = `${mA} and ${mB} moved in an unexpected way.`;
   }
 
-  // Sentence 2: historical context — elasticity anomalies show the typical ratio; direction anomalies show co-movement %
+  // Sentence 2: elasticity anomalies show expected vs actual; direction anomalies show co-movement %
   let s2: string;
-  if (tag === 'elas' && isFinite(mElasticity) && mElasticity !== 0) {
-    const ratio = Math.abs(mElasticity).toFixed(1);
-    s2 = `Historically, a 1% change in ${mA} is associated with about a ${ratio}% change in ${mB}.`;
+  if (tag === 'elas' && isFinite(mElasticity) && mElasticity !== 0 && rawPctA !== null && rawPctB !== null) {
+    const expectedPctB = rawPctA / mElasticity;
+    const verb = rawPctA >= 0 ? 'rise' : 'fall';
+    s2 = `Based on past patterns, a ${Math.round(Math.abs(rawPctA))}% ${verb} in ${mA} typically leads to about ${Math.round(Math.abs(expectedPctB))}% in ${mB} — the actual change was ${Math.round(Math.abs(rawPctB))}%.`;
+  } else if (tag === 'elas' && isFinite(mElasticity) && mElasticity !== 0) {
+    s2 = `Historically, a 1% change in ${mA} is associated with about a ${Math.abs(mElasticity).toFixed(1)}% change in ${mB}.`;
   } else {
     const togetherPct = Math.round(dScore * 100);
     s2 = `Historically these two metrics move together ${togetherPct}% of the time.`;

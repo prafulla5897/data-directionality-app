@@ -613,29 +613,31 @@ No formulas. No Greek letters. No jargon.
 
 **Content:**
 ```
-1. Plain English summary (same 3-sentence body as the anomaly card)
-   Direction example: "For the week of Nov 15, spend fell 44% while
-    impressions barely moved. Historically these two metrics move
-    together 89% of the time. This was a single-period departure from
-    that pattern."
-   Elasticity example: "Impressions fell 5% while clicks fell 4%.
-    Historically, a 1% change in impressions is associated with about
-    a 0.3% change in clicks. This continued for 2 consecutive periods."
+1. Plain English summary — period prefix + anomaly.body (identical to card)
+   Direction example: "Feb 12–18, 2024: spend fell 44% while impressions
+    barely moved. Historically these two metrics move together 89% of
+    the time. This was a single-period departure from that pattern."
+   Elasticity example: "Feb 12–18, 2024: spend rose 2% while impressions
+    rose 15%. Based on past patterns, a 2% rise in spend typically leads
+    to about 3% in impressions — the actual change was 15%. This was a
+    single-period departure from that pattern."
 
-2. "How each metric changed" — grouped bar chart
-   Two bar groups, one per metric (metricA, metricB)
-   Amber bar = baseline average; red bar = anomaly period average
-   % change label drawn above each red bar (e.g. "−45%")
-   Tooltip: "Baseline: 35.1K | Anomaly: 19.3K (−45% vs baseline)"
-
-3. "How they moved over time" — dual-axis line chart
+2. "How they moved over time" — dual-axis line chart (shown first)
    MetricA: solid amber line (left Y-axis, actual values)
    MetricB: dashed cyan line (right Y-axis, actual values)
    Anomaly period shaded in pink
    Toggle: [Actual values] | [Relative view]
      Relative view: both metrics indexed (baseline avg = 100) on a
      single Y-axis so divergence is visually obvious; tooltip still
-     shows actual values; plain-English explanation shown below chart
+     shows actual values; explanation below chart includes a worked
+     example and the formula: (value ÷ baseline average) × 100
+
+3. "How each metric changed" — stat table (shown second)
+   Columns: Metric | Baseline avg | Anomaly period avg | Change
+   Baseline avg = arithmetic mean of all data points before anomaly.periodStart
+   Change is colour-coded green (positive) / red (negative)
+   Replaces the former grouped bar chart (which had a fatal single-axis
+   scale problem when metrics have very different magnitudes)
 
 4. Dimension context
    "Analysed at: Campaign + Creative level"
