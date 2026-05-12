@@ -182,6 +182,7 @@ export interface AppState {
     analysisGrain: Grain;
     displayGrain: Grain;
     timeBudgetSeconds: number;
+    weekStartDay: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0=Sun, 1=Mon…6=Sat
   };
   seriesList: Series[];
   baselineStats: BaselineStats[];

@@ -35,15 +35,14 @@ function parseRawDate(val: string | number | null, dateFormat: string): Date | n
   return isNaN(d.getTime()) ? null : d;
 }
 
-function grainKey(date: Date, grain: Grain, weekStartDay: 0 | 1 = 1): string {
+function grainKey(date: Date, grain: Grain, weekStartDay: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 1): string {
   switch (grain) {
     case 'daily':
       return date.toISOString().slice(0, 10);
     case 'weekly': {
       const d = new Date(date.getTime());
       const day = d.getUTCDay();
-      // weekStartDay 1 = Monday, 0 = Sunday
-      const diff = weekStartDay === 1 ? (day === 0 ? -6 : 1 - day) : -day;
+      const diff = -((day - weekStartDay + 7) % 7);
       d.setUTCDate(d.getUTCDate() + diff);
       return d.toISOString().slice(0, 10);
     }
@@ -177,7 +176,7 @@ export function generateDimensionSubsets(dimensions: string[]): string[][] {
  * @param schema - Confirmed schema with metric types and formulas
  * @param grain - Time granularity for aggregation
  * @param dimensions - Selected dimension column names
- * @param weekStartDay - 0 = Sunday, 1 = Monday (default). Only affects weekly grain.
+ * @param weekStartDay - 0=Sun, 1=Mon (default), 2=Tue … 6=Sat. Only affects weekly grain.
  * @returns Array of Series objects, one per unique dimension combination
  * @example
  * const series = buildSeries(rows, schema, 'weekly', ['campaign'], 1);
@@ -187,7 +186,7 @@ export function buildSeries(
   schema: Schema,
   grain: Grain,
   dimensions: string[],
-  weekStartDay: 0 | 1 = 1,
+  weekStartDay: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 1,
 ): Series[] {
   type GrainMap = Map<string, RawRow[]>;
   const groups = new Map<string, GrainMap>();

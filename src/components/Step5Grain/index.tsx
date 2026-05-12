@@ -20,6 +20,16 @@ interface Step5GrainProps {
 
 const GRAIN_ORDER: Grain[] = ['daily', 'weekly', 'monthly', 'quarterly'];
 
+const WEEK_START_OPTIONS: Array<{ value: 0 | 1 | 2 | 3 | 4 | 5 | 6; label: string }> = [
+  { value: 1, label: 'Monday' },
+  { value: 2, label: 'Tuesday' },
+  { value: 3, label: 'Wednesday' },
+  { value: 4, label: 'Thursday' },
+  { value: 5, label: 'Friday' },
+  { value: 6, label: 'Saturday' },
+  { value: 0, label: 'Sunday' },
+];
+
 function grainKey(d: Date, grain: Grain): string {
   if (grain === 'daily') return d.toISOString().slice(0, 10);
   if (grain === 'weekly') {
@@ -116,7 +126,7 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
   });
 
   const [timeBudget, setTimeBudget] = useState(initialGrain.timeBudgetSeconds);
-  const [weekStartDay, setWeekStartDay] = useState<0 | 1>(initialGrain.weekStartDay ?? 1);
+  const [weekStartDay, setWeekStartDay] = useState<0 | 1 | 2 | 3 | 4 | 5 | 6>(initialGrain.weekStartDay ?? 1);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [dimWarningAccepted, setDimWarningAccepted] = useState(false);
 
@@ -168,7 +178,7 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
       <div>
         <h2 className={styles.heading}>Set analysis grain</h2>
         <p className={styles.subheading}>
-          Choose how to group data for analysis and how to display results.
+          Choose how to group your data for analysis.
         </p>
       </div>
 
@@ -208,14 +218,14 @@ export function Step5Grain({ rawRows, schema, scopeConfig, initialGrain, onConfi
           <div className={styles.weekStartRow}>
             <span className={styles.sectionLabel}>Week starts on</span>
             <div className={styles.grainRow}>
-              {([0, 1] as const).map(day => (
+              {WEEK_START_OPTIONS.map(({ value, label }) => (
                 <button
-                  key={day}
-                  className={`${styles.grainBtn} ${weekStartDay === day ? styles.grainBtnActive : ''}`}
-                  onClick={() => setWeekStartDay(day)}
-                  aria-pressed={weekStartDay === day}
+                  key={value}
+                  className={`${styles.grainBtn} ${weekStartDay === value ? styles.grainBtnActive : ''}`}
+                  onClick={() => setWeekStartDay(value)}
+                  aria-pressed={weekStartDay === value}
                 >
-                  {day === 0 ? 'Sunday' : 'Monday'}
+                  {label}
                 </button>
               ))}
             </div>
