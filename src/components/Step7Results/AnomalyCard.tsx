@@ -34,6 +34,12 @@ function badgeClass(severity: Anomaly['severity']): string {
   return styles.badgeInfo;
 }
 
+const SEVERITY_TOOLTIP: Record<Anomaly['severity'], string> = {
+  info: 'Single-period departure from the usual pattern between these two metrics.',
+  warning: 'Unusual pattern that persisted across 2 or more consecutive periods.',
+  critical: 'Metrics moved in opposite directions across 3 or more consecutive periods.',
+};
+
 /**
  * Renders a single anomaly insight card with severity badge, title, body, and drill-down link.
  * @param props - anomaly data and drill-down callback
@@ -45,7 +51,11 @@ export function AnomalyCard({ anomaly, onDrilldown }: AnomalyCardProps): JSX.Ele
   return (
     <div className={`${styles.card} ${styles[anomaly.severity]}`} data-severity={anomaly.severity}>
       <div className={styles.cardHeader}>
-        <span className={`${styles.badge} ${badgeClass(anomaly.severity)}`}>
+        <span
+          className={`${styles.badge} ${badgeClass(anomaly.severity)}`}
+          title={SEVERITY_TOOLTIP[anomaly.severity]}
+          style={{ cursor: 'help' }}
+        >
           {anomaly.severity.toUpperCase()}
         </span>
         <span className={styles.cardPeriod}>{periodLabel(anomaly)}</span>
