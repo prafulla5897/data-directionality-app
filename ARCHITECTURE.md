@@ -610,15 +610,20 @@ No formulas. No Greek letters. No jargon.
     moved. Historically these two metrics move together 89% of the
     time. This was a single-period departure from that pattern."
 
-2. Scatterplot: metricA vs metricB
-   Historical baseline weeks as amber dots
-   Linear trend line through baseline (dashed)
-   Anomaly-window weeks highlighted in red
-   Tooltip on anomaly dots: date + % change vs prior period for each metric
+2. "How each metric changed" — grouped bar chart
+   Two bar groups, one per metric (metricA, metricB)
+   Amber bar = baseline average; red bar = anomaly period average
+   % change label drawn above each red bar (e.g. "−45%")
+   Tooltip: "Baseline: 35.1K | Anomaly: 19.3K (−45% vs baseline)"
 
-3. Time-series chart: both metrics overlaid
-   Anomaly period shaded
-   Dual Y-axes when metrics have different scales
+3. "How they moved over time" — dual-axis line chart
+   MetricA: solid amber line (left Y-axis, actual values)
+   MetricB: dashed cyan line (right Y-axis, actual values)
+   Anomaly period shaded in pink
+   Toggle: [Actual values] | [Relative view]
+     Relative view: both metrics indexed (baseline avg = 100) on a
+     single Y-axis so divergence is visually obvious; tooltip still
+     shows actual values; plain-English explanation shown below chart
 
 4. Dimension context
    "Analysed at: Campaign + Creative level"
