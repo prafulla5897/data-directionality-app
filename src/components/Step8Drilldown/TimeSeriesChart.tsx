@@ -49,8 +49,8 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
     if (chartRef.current) chartRef.current.destroy();
 
     const labels = series.dates.map(fmtLabel);
-    const dataA = series.values[mA].map(v => (v === null ? NaN : v));
-    const dataB = series.values[mB].map(v => (v === null ? NaN : v));
+    const dataA = (series.values[mA] ?? []).map(v => (v === null ? NaN : v));
+    const dataB = (series.values[mB] ?? []).map(v => (v === null ? NaN : v));
     const startIdx = series.dates.findIndex(d => d >= anomaly.periodStart);
     const endIdx = lastIndexWhere(series.dates, d => d <= anomaly.periodEnd);
 
@@ -119,6 +119,7 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
           },
           y: {
             type: 'linear',
+            display: true,
             position: 'left',
             title: { display: true, text: mA, color: CHART_COLORS[0], font: { size: 10 } },
             ticks: { color: TICK_COLOR, callback: v => fmtNum(Number(v)) },
@@ -126,6 +127,7 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
           },
           y1: {
             type: 'linear',
+            display: true,
             position: 'right',
             title: { display: true, text: mB, color: CHART_COLORS[1], font: { size: 10 } },
             ticks: { color: TICK_COLOR, callback: v => fmtNum(Number(v)) },
