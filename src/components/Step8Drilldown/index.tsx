@@ -1,9 +1,8 @@
 /**
- * Step 8 — Drill-down view: plain-English summary, comparison chart, time-series, drill navigation.
+ * Step 8 — Drill-down view: plain-English summary, time-series, metric stat block, drill navigation.
  */
 
 import type { Anomaly, Series, Schema, AppState } from '../../types/index.js';
-import { ComparisonChart } from './ComparisonChart.js';
 import { TimeSeriesChart } from './TimeSeriesChart.js';
 import styles from './Step8Drilldown.module.css';
 
@@ -44,19 +43,33 @@ function displayPeriodEnd(start: Date, end: Date): Date {
 }
 
 function buildSummary(anomaly: Anomaly): string {
-  const [mA, mB] = anomaly.metricPair;
   const endDisplay = displayPeriodEnd(anomaly.periodStart, anomaly.periodEnd);
   const period = `${fmtDate(anomaly.periodStart)} – ${fmtDate(endDisplay)}`;
-  const dirPct = Math.round(anomaly.stats.directionScore * 100);
-  const ratio = isNaN(anomaly.stats.meanElasticity)
-    ? ''
-    : ` Historically a 1% change in ${mA} moves ${mB} by about ${fmtNum(Math.abs(anomaly.stats.meanElasticity))}%.`;
-  const persist = anomaly.persistencePeriods > 1 ? ` This lasted ${anomaly.persistencePeriods} consecutive periods.` : '';
-  return (
-    `${period}: ${anomaly.title}. ` +
-    `${mA} and ${mB} usually move the same way ${dirPct}% of the time.` +
-    ratio + persist
-  );
+  return `${period}: ${anomaly.body}`;
+}
+
+interface MetricStat { baselineAvg: number | null; anomalyAvg: number | null; pctChange: number | null; }
+
+function computeStat(series: Series, metric: string, anomaly: Anomaly): MetricStat {
+  const vals = series.values[metric] ?? [];
+  const baseVals: number[] = [];
+  const aVals: number[] = [];
+  for (let i = 0; i < series.dates.length; i++) {
+    const d = series.dates[i];
+    const v = vals[i];
+    if (v === null || v === undefined) continue;
+    if (d < anomaly.periodStart) {
+      baseVals.push(v as number);
+    } else if (d >= anomaly.periodStart &&
+      (anomaly.periodEnd > anomaly.periodStart ? d < anomaly.periodEnd : d.getTime() === anomaly.periodStart.getTime())) {
+      aVals.push(v as number);
+    }
+  }
+  const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  const bAvg = avg(baseVals);
+  const aAvg = avg(aVals);
+  const pct = bAvg !== null && aAvg !== null && bAvg !== 0 ? ((aAvg - bAvg) / Math.abs(bAvg)) * 100 : null;
+  return { baselineAvg: bAvg, anomalyAvg: aAvg, pctChange: pct };
 }
 
 function badgeClass(severity: Anomaly['severity'], s: Record<string, string>): string {
@@ -67,7 +80,7 @@ function badgeClass(severity: Anomaly['severity'], s: Record<string, string>): s
 
 /**
  * Drill-down detail view for a selected anomaly.
- * Shows plain-English summary, scatter chart, time-series chart, and drill navigation.
+ * Shows plain-English summary, time-series chart, metric stat table, and drill navigation.
  * @param props - anomaly, all anomalies for drill nav, series list, schema, grain config, callbacks
  * @returns JSX drill-down view
  */
@@ -76,6 +89,9 @@ export function Step8Drilldown({
 }: Step8DrilldownProps): JSX.Element {
   const series = findSeries(seriesList, anomaly);
   const [mA, mB] = anomaly.metricPair;
+
+  const stA = series ? computeStat(series, mA, anomaly) : null;
+  const stB = series ? computeStat(series, mB, anomaly) : null;
 
   const drillUp = allAnomalies.filter(a => {
     if (a.id === anomaly.id) return false;
@@ -116,12 +132,33 @@ export function Step8Drilldown({
       {series ? (
         <>
           <div className={styles.chartCard}>
-            <p className={styles.sectionLabel}>How each metric changed</p>
-            <ComparisonChart anomaly={anomaly} series={series} />
-          </div>
-          <div className={styles.chartCard}>
             <p className={styles.sectionLabel}>How they moved over time</p>
             <TimeSeriesChart anomaly={anomaly} series={series} />
+          </div>
+          <div className={styles.chartCard}>
+            <p className={styles.sectionLabel}>How each metric changed</p>
+            <table className={styles.statTable}>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Baseline avg</th>
+                  <th>Anomaly period avg</th>
+                  <th>Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                {([{ label: mA, st: stA }, { label: mB, st: stB }] as const).map(({ label, st }) => (
+                  <tr key={label}>
+                    <td>{label}</td>
+                    <td>{st?.baselineAvg !== null && st?.baselineAvg !== undefined ? fmtNum(st.baselineAvg) : '—'}</td>
+                    <td>{st?.anomalyAvg !== null && st?.anomalyAvg !== undefined ? fmtNum(st.anomalyAvg) : '—'}</td>
+                    <td style={{ color: st?.pctChange == null ? 'inherit' : st.pctChange > 0 ? '#4caf50' : '#ff6b5b', fontFamily: 'var(--font-mono)' }}>
+                      {st?.pctChange != null ? `${st.pctChange >= 0 ? '+' : ''}${Math.round(st.pctChange)}%` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </>
       ) : (
