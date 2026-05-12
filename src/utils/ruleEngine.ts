@@ -89,10 +89,12 @@ function buildBody(
   mB: string,
   persistencePeriods: number,
   dScore: number,
+  mElasticity: number,
   aVals: (number | null)[],
   bVals: (number | null)[],
   runStart: number,
   anomalyIdx: number[],
+  tag: string,
 ): string {
   const iCurr = anomalyIdx[runStart];
   const iPrev = iCurr - 1;
@@ -100,7 +102,6 @@ function buildBody(
   const bCurr = iCurr < bVals.length ? bVals[iCurr] : null;
   const aPrev = iPrev >= 0 ? aVals[iPrev] : null;
   const bPrev = iPrev >= 0 ? bVals[iPrev] : null;
-  const togetherPct = Math.round(dScore * 100);
 
   // Sentence 1: what happened
   let s1: string;
@@ -118,8 +119,15 @@ function buildBody(
     s1 = `${mA} and ${mB} moved in an unexpected way.`;
   }
 
-  // Sentence 2: historical context
-  const s2 = `Historically these two metrics move together ${togetherPct}% of the time.`;
+  // Sentence 2: historical context — elasticity anomalies show the typical ratio; direction anomalies show co-movement %
+  let s2: string;
+  if (tag === 'elas' && isFinite(mElasticity) && mElasticity !== 0) {
+    const ratio = Math.abs(mElasticity).toFixed(1);
+    s2 = `Historically, a 1% change in ${mA} is associated with about a ${ratio}% change in ${mB}.`;
+  } else {
+    const togetherPct = Math.round(dScore * 100);
+    s2 = `Historically these two metrics move together ${togetherPct}% of the time.`;
+  }
 
   // Sentence 3: persistence
   const s3 = persistencePeriods > 1
@@ -158,7 +166,7 @@ function makeAnomaly(
     periodEnd,
     persistencePeriods: run.length,
     title: buildTitle(severity, mA, mB, series.values[mA], series.values[mB], run.start, anomalyIdx),
-    body: buildBody(severity, mA, mB, run.length, dScore, series.values[mA], series.values[mB], run.start, anomalyIdx),
+    body: buildBody(severity, mA, mB, run.length, dScore, mElasticity, series.values[mA], series.values[mB], run.start, anomalyIdx, tag),
     stats: {
       directionScore: dScore,
       meanElasticity: mElasticity,
