@@ -1,9 +1,9 @@
 /**
- * Step 8 — Drill-down view: plain-English summary, scatter, time-series, drill navigation.
+ * Step 8 — Drill-down view: plain-English summary, comparison chart, time-series, drill navigation.
  */
 
 import type { Anomaly, Series, Schema, AppState } from '../../types/index.js';
-import { ScatterChart } from './ScatterChart.js';
+import { ComparisonChart } from './ComparisonChart.js';
 import { TimeSeriesChart } from './TimeSeriesChart.js';
 import styles from './Step8Drilldown.module.css';
 
@@ -116,11 +116,11 @@ export function Step8Drilldown({
       {series ? (
         <>
           <div className={styles.chartCard}>
-            <p className={styles.sectionLabel}>{mA} vs {mB} — scatter</p>
-            <ScatterChart anomaly={anomaly} series={series} />
+            <p className={styles.sectionLabel}>How each metric changed</p>
+            <ComparisonChart anomaly={anomaly} series={series} />
           </div>
           <div className={styles.chartCard}>
-            <p className={styles.sectionLabel}>Over time</p>
+            <p className={styles.sectionLabel}>How they moved over time</p>
             <TimeSeriesChart anomaly={anomaly} series={series} />
           </div>
         </>

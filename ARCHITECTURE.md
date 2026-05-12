@@ -371,9 +371,8 @@ Baseline period (define "normal"):
             ↑ date pickers are constrained to dataset min/max
 
 Anomaly window (what to check):
-  ○ Last 1 week
-  ● Last 1 month  ← default
-  ○ Last 3 months
+  ○ Last 7 days
+  ● Month to date  ← default
   ○ Custom: [start] → [end]
             ↑ date pickers are constrained to dataset min/max
 
@@ -451,6 +450,11 @@ If total_rows at daily grain > 50,000:
 Analysis grain:
   [Daily — disabled if >50k*] [Weekly ✓] [Monthly] [Quarterly]
   ℹ Recommended: weekly
+
+  When Weekly is selected, a second row appears:
+  Week starts on:
+    [Monday ✓] [Tuesday] [Wednesday] [Thursday] [Friday] [Saturday] [Sunday]
+  Default: Monday
 
   (Display grain is NOT shown — it is auto-computed from analysis grain
    and data span when the user clicks "Run Analysis".)
@@ -552,9 +556,10 @@ Each card shows analysis_grain detail (e.g. "Week of Nov 15–22")
 
 Card format:
   🔴 CRITICAL
-  Retargeting · Week of Nov 15–22
-  "Spend increased 18%, impressions dropped 8%."
-  "Historically these move together. This lasted 3 weeks."
+  Retargeting · Week of Nov 15–21
+  "Spend fell 44% while impressions barely moved."
+  "Historically these two metrics move together 89% of the time."
+  "This was a single-period departure from that pattern."
   [Campaign] [spend ↔ impressions]
   [See detail ▶]
 
@@ -562,7 +567,11 @@ Rules:
   - No "elasticity", "r-value", "sigma", "correlation" in card text
   - Plain English only
   - Title ≤ 80 characters
-  - Body: 2–3 sentences maximum
+  - Body: exactly 3 sentences:
+    S1: actual % change (e.g. "Spend fell 44% while impressions barely moved.")
+    S2: historical context (e.g. "Historically these two metrics move together N% of the time.")
+    S3: persistence (e.g. "This was a single-period departure from that pattern." or
+        "This continued for N consecutive periods.")
 ```
 
 **Section 3 — How we calculate (collapsed by default):**
@@ -597,17 +606,19 @@ No formulas. No Greek letters. No jargon.
 **Content:**
 ```
 1. Plain English summary
-   "For the week of Nov 15, spend increased by 18% but impressions
-    dropped 8%. Historically a 1% increase in spend yields 0.84%
-    more impressions. This week's ratio was -0.44, which is 3.2
-    standard deviations below normal. This lasted 3 consecutive weeks."
+   "For the week of Nov 15, spend fell 44% while impressions barely
+    moved. Historically these two metrics move together 89% of the
+    time. This was a single-period departure from that pattern."
 
 2. Scatterplot: metricA vs metricB
-   All baseline weeks as dots
-   Anomaly weeks highlighted in red
+   Historical baseline weeks as amber dots
+   Linear trend line through baseline (dashed)
+   Anomaly-window weeks highlighted in red
+   Tooltip on anomaly dots: date + % change vs prior period for each metric
 
 3. Time-series chart: both metrics overlaid
    Anomaly period shaded
+   Dual Y-axes when metrics have different scales
 
 4. Dimension context
    "Analysed at: Campaign + Creative level"
