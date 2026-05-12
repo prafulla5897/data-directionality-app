@@ -673,6 +673,8 @@ For each period p in anomaly_window:
 
   direction_broke = sign changed vs baseline direction_score norm
   elasticity_broke = sigma > THRESHOLDS.SIGMA_THRESHOLD (2.0)
+                     AND (|pctA| >= MIN_ANOMALY_PCT_CHANGE OR |pctB| >= MIN_ANOMALY_PCT_CHANGE)
+                     ← skip if both metrics changed by < 5% (noise suppression)
   persisted = condition true for ≥ THRESHOLDS.MIN_PERSISTENCE (2) consecutive periods
 
   if direction_broke AND persisted ≥ 3 → CRITICAL
@@ -694,6 +696,7 @@ export const THRESHOLDS = {
   CRITICAL_PERSISTENCE:      3,
   MIN_BASELINE_POINTS:       14,
   DATE_PARSE_MIN_SUCCESS:    0.9,    // 90% of rows must parse
+  MIN_ANOMALY_PCT_CHANGE:    0.05,   // 5% min change for elasticity anomaly
 };
 
 export const CONFIG = {
