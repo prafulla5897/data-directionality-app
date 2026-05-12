@@ -563,13 +563,21 @@ Card format:
   [Campaign] [spend ↔ impressions]
   [See detail ▶]
 
+  Severity badge has a hover tooltip explaining the level:
+    INFO     → "Single-period departure from the usual pattern between these two metrics."
+    WARNING  → "Unusual pattern that persisted across 2 or more consecutive periods."
+    CRITICAL → "Metrics moved in opposite directions across 3 or more consecutive periods."
+
 Rules:
   - No "elasticity", "r-value", "sigma", "correlation" in card text
   - Plain English only
   - Title ≤ 80 characters
   - Body: exactly 3 sentences:
     S1: actual % change (e.g. "Spend fell 44% while impressions barely moved.")
-    S2: historical context (e.g. "Historically these two metrics move together N% of the time.")
+    S2: historical context — varies by anomaly type:
+        Direction anomaly: "Historically these two metrics move together N% of the time."
+        Elasticity anomaly: "Historically, a 1% change in [mA] is associated with about a
+          [ratio]% change in [mB]." (shows the typical proportional relationship)
     S3: persistence (e.g. "This was a single-period departure from that pattern." or
         "This continued for N consecutive periods.")
 ```
@@ -605,10 +613,14 @@ No formulas. No Greek letters. No jargon.
 
 **Content:**
 ```
-1. Plain English summary
-   "For the week of Nov 15, spend fell 44% while impressions barely
-    moved. Historically these two metrics move together 89% of the
-    time. This was a single-period departure from that pattern."
+1. Plain English summary (same 3-sentence body as the anomaly card)
+   Direction example: "For the week of Nov 15, spend fell 44% while
+    impressions barely moved. Historically these two metrics move
+    together 89% of the time. This was a single-period departure from
+    that pattern."
+   Elasticity example: "Impressions fell 5% while clicks fell 4%.
+    Historically, a 1% change in impressions is associated with about
+    a 0.3% change in clicks. This continued for 2 consecutive periods."
 
 2. "How each metric changed" — grouped bar chart
    Two bar groups, one per metric (metricA, metricB)
