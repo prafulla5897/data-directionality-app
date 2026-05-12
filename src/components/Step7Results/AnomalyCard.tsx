@@ -14,9 +14,14 @@ function fmtDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/** Returns the inclusive display end: periodEnd is the next-period start, so subtract one day. */
+function displayPeriodEnd(start: Date, end: Date): Date {
+  return end.getTime() > start.getTime() ? new Date(end.getTime() - 86_400_000) : start;
+}
+
 function periodLabel(anomaly: Anomaly): string {
   const s = fmtDate(anomaly.periodStart);
-  const e = fmtDate(anomaly.periodEnd);
+  const e = fmtDate(displayPeriodEnd(anomaly.periodStart, anomaly.periodEnd));
   return s === e ? s : `${s} – ${e}`;
 }
 

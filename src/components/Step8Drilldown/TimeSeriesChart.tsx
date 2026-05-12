@@ -1,5 +1,6 @@
 /**
  * Time-series chart — both metrics overlaid with anomaly period shading.
+ * Uses dual Y-axes so metrics with different magnitudes are both readable.
  */
 
 import { useEffect, useRef } from 'react';
@@ -29,9 +30,12 @@ function lastIndexWhere(arr: Date[], pred: (d: Date) => boolean): number {
   return -1;
 }
 
+const GRID_COLOR = 'rgba(255,255,255,0.04)';
+const TICK_COLOR = 'rgba(232,230,225,0.5)';
+
 /**
- * Renders a time-series line chart for two metrics with anomaly period shaded.
- * Uses a custom Chart.js plugin to draw the background shade.
+ * Renders a time-series line chart for two metrics with dual Y-axes and anomaly period shaded.
+ * Left axis = metricA, right axis = metricB. Anomaly period shaded with a custom plugin.
  * @param props - anomaly and matching series
  * @returns canvas element wrapped in a div
  */
@@ -81,6 +85,7 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
             borderWidth: 2,
             tension: 0.2,
             spanGaps: true,
+            yAxisID: 'y',
           },
           {
             label: mB,
@@ -91,6 +96,7 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
             borderWidth: 2,
             tension: 0.2,
             spanGaps: true,
+            yAxisID: 'y1',
           },
         ],
       },
@@ -108,12 +114,22 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
         },
         scales: {
           x: {
-            ticks: { color: 'rgba(232,230,225,0.5)', maxTicksLimit: 8, font: { size: 10 } },
-            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: TICK_COLOR, maxTicksLimit: 8, font: { size: 10 } },
+            grid: { color: GRID_COLOR },
           },
           y: {
-            ticks: { color: 'rgba(232,230,225,0.5)', callback: v => fmtNum(Number(v)) },
-            grid: { color: 'rgba(255,255,255,0.04)' },
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: mA, color: CHART_COLORS[0], font: { size: 10 } },
+            ticks: { color: TICK_COLOR, callback: v => fmtNum(Number(v)) },
+            grid: { color: GRID_COLOR },
+          },
+          y1: {
+            type: 'linear',
+            position: 'right',
+            title: { display: true, text: mB, color: CHART_COLORS[1], font: { size: 10 } },
+            ticks: { color: TICK_COLOR, callback: v => fmtNum(Number(v)) },
+            grid: { drawOnChartArea: false },
           },
         },
       },
@@ -127,7 +143,7 @@ export function TimeSeriesChart({ anomaly, series }: TimeSeriesChartProps): JSX.
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label={`Time-series chart for ${mA} and ${mB}. Anomaly period is shaded in red.`}
+        aria-label={`Time-series chart for ${mA} (left axis) and ${mB} (right axis). Anomaly period shaded in red.`}
       />
     </div>
   );

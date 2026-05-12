@@ -36,9 +36,14 @@ function findSeries(seriesList: Series[], anomaly: Anomaly): Series | undefined 
   });
 }
 
+function displayPeriodEnd(start: Date, end: Date): Date {
+  return end.getTime() > start.getTime() ? new Date(end.getTime() - 86_400_000) : start;
+}
+
 function buildSummary(anomaly: Anomaly): string {
   const [mA, mB] = anomaly.metricPair;
-  const period = `${fmtDate(anomaly.periodStart)} – ${fmtDate(anomaly.periodEnd)}`;
+  const endDisplay = displayPeriodEnd(anomaly.periodStart, anomaly.periodEnd);
+  const period = `${fmtDate(anomaly.periodStart)} – ${fmtDate(endDisplay)}`;
   const dirPct = Math.round(anomaly.stats.directionScore * 100);
   const ratio = isNaN(anomaly.stats.meanElasticity)
     ? ''
@@ -95,6 +100,11 @@ export function Step8Drilldown({
         </span>
         <h2 className={styles.heading}>{anomaly.title}</h2>
       </div>
+      {Object.values(anomaly.dimensionValues).filter(Boolean).length > 0 && (
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: '0 0 0.25rem' }}>
+          {Object.values(anomaly.dimensionValues).filter(Boolean).join(' · ')}
+        </p>
+      )}
 
       <div className={styles.summary} aria-label="Plain-English summary">
         {buildSummary(anomaly)}
