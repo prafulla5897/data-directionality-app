@@ -104,8 +104,8 @@ export interface AppState {
     analysisGrain: Grain;
     displayGrain: Grain;
     timeBudgetSeconds: number;
-    /** 0 = Sunday, 1 = Monday (default) */
-    weekStartDay: 0 | 1;
+    /** 0=Sun 1=Mon(default) 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat */
+    weekStartDay: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   };
   seriesList: Series[];
   baselineStats: BaselineStats[];

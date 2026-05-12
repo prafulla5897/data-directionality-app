@@ -12,12 +12,16 @@ interface ScatterChartProps {
   series: Series;
 }
 
-interface Point { x: number; y: number; }
+interface Point { x: number; y: number; dateLabel: string; }
 
 function fmtNum(n: number): string {
   if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (Math.abs(n) >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return n.toFixed(2);
+}
+
+function fmtDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 /**
@@ -35,19 +39,28 @@ export function ScatterChart({ anomaly, series }: ScatterChartProps): JSX.Elemen
     if (!canvasRef.current) return;
     if (chartRef.current) chartRef.current.destroy();
 
-    const aVals = series.values[mA];
-    const bVals = series.values[mB];
+    const aVals = series.values[mA] ?? [];
+    const bVals = series.values[mB] ?? [];
     const baseline: Point[] = [];
     const anomalyPts: Point[] = [];
 
+    // periodEnd is stored as next-period start (exclusive upper bound)
+    const anomalyEndExclusive = anomaly.periodEnd > anomaly.periodStart
+      ? anomaly.periodEnd
+      : null; // single-point edge case
+
     for (let i = 0; i < series.dates.length; i++) {
       const av = aVals[i]; const bv = bVals[i];
-      if (av === null || bv === null) continue;
-      // All points shown as baseline; anomaly window also overlaid in red on top
-      baseline.push({ x: av, y: bv });
+      if (av === null || av === undefined || bv === null || bv === undefined) continue;
       const d = series.dates[i];
-      if (d >= anomaly.periodStart && d <= anomaly.periodEnd) {
-        anomalyPts.push({ x: av, y: bv });
+      const dateLabel = fmtDate(d);
+      const inAnomalyWindow = anomalyEndExclusive
+        ? d >= anomaly.periodStart && d < anomalyEndExclusive
+        : d.getTime() === anomaly.periodStart.getTime();
+      if (inAnomalyWindow) {
+        anomalyPts.push({ x: av, y: bv, dateLabel });
+      } else {
+        baseline.push({ x: av, y: bv, dateLabel });
       }
     }
 
@@ -56,7 +69,7 @@ export function ScatterChart({ anomaly, series }: ScatterChartProps): JSX.Elemen
       data: {
         datasets: [
           {
-            label: 'Baseline',
+            label: 'Historical',
             data: baseline,
             backgroundColor: `${CHART_COLORS[0]}99`,
             pointRadius: 5,
@@ -78,9 +91,10 @@ export function ScatterChart({ anomaly, series }: ScatterChartProps): JSX.Elemen
           legend: { labels: { color: 'rgba(232,230,225,0.7)', font: { size: 11 } } },
           tooltip: {
             callbacks: {
+              title: ctx => (ctx[0]?.raw as Point | undefined)?.dateLabel ?? '',
               label: ctx => {
                 const p = ctx.raw as Point;
-                return `${mA}: ${fmtNum(p.x)}, ${mB}: ${fmtNum(p.y)}`;
+                return `${mA}: ${fmtNum(p.x)}  ·  ${mB}: ${fmtNum(p.y)}`;
               },
             },
           },
