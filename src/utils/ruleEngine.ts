@@ -94,43 +94,39 @@ function buildBody(
   runStart: number,
   anomalyIdx: number[],
 ): string {
-  const pWord = persistencePeriods === 1 ? 'period' : `${persistencePeriods} consecutive periods`;
-  const i0 = anomalyIdx[runStart];
-  const i1 = anomalyIdx[runStart + 1] ?? i0;
-  const a0 = aVals[i0]; const a1 = aVals[i1];
-  const b0 = bVals[i0]; const b1 = bVals[i1];
+  const iCurr = anomalyIdx[runStart];
+  const iPrev = iCurr - 1;
+  const aCurr = iCurr < aVals.length ? aVals[iCurr] : null;
+  const bCurr = iCurr < bVals.length ? bVals[iCurr] : null;
+  const aPrev = iPrev >= 0 ? aVals[iPrev] : null;
+  const bPrev = iPrev >= 0 ? bVals[iPrev] : null;
+  const togetherPct = Math.round(dScore * 100);
 
-  if (severity === 'critical') {
-    const togetherPct = Math.round(dScore * 100);
-    if (a0 !== null && a1 !== null && a0 !== 0 && b0 !== null && b0 !== 0 && b1 !== null) {
-      const aDir = a1 >= a0 ? 'increased' : 'dropped';
-      const bDir = b1 >= b0 ? 'increased' : 'dropped';
-      const aPct = Math.round(Math.abs((a1 - a0) / a0) * 100);
-      const bPct = Math.round(Math.abs((b1 - b0) / b0) * 100);
-      return `${mA} ${aDir} ${aPct}% while ${mB} ${bDir} ${bPct}%. ` +
-        `Historically these move the same way ${togetherPct}% of the time. ` +
-        `This pattern continued for ${pWord}.`;
-    }
-    return `${mA} and ${mB} moved in opposite directions. ` +
-      `Historically they move the same way ${togetherPct}% of the time. ` +
-      `This lasted ${pWord}.`;
+  // Sentence 1: what happened
+  let s1: string;
+  if (aCurr !== null && bCurr !== null && aPrev !== null && bPrev !== null && aPrev !== 0 && bPrev !== 0) {
+    const pctA = Math.round((aCurr - aPrev) / Math.abs(aPrev) * 100);
+    const pctB = Math.round((bCurr - bPrev) / Math.abs(bPrev) * 100);
+    const descA = Math.abs(pctA) < 2 ? `${mA} was roughly flat` : `${mA} ${pctA < 0 ? 'fell' : 'rose'} ${Math.abs(pctA)}%`;
+    const descB = Math.abs(pctB) < 2 ? `${mB} barely moved` : `${mB} ${pctB < 0 ? 'fell' : 'rose'} ${Math.abs(pctB)}%`;
+    s1 = `${descA} while ${descB}.`;
+  } else if (severity === 'critical') {
+    s1 = `${mA} and ${mB} moved in opposite directions.`;
+  } else if (severity === 'warning') {
+    s1 = `${mA} and ${mB} changed by an unusually different amount.`;
+  } else {
+    s1 = `${mA} and ${mB} moved in an unexpected way.`;
   }
-  if (severity === 'warning') {
-    if (a0 !== null && a1 !== null && a0 !== 0 && b0 !== null && b0 !== 0 && b1 !== null) {
-      const aDir = a1 >= a0 ? 'increased' : 'dropped';
-      const bDir = b1 >= b0 ? 'increased' : 'dropped';
-      const aPct = Math.round(Math.abs((a1 - a0) / a0) * 100);
-      const bPct = Math.round(Math.abs((b1 - b0) / b0) * 100);
-      return `${mA} ${aDir} ${aPct}% while ${mB} ${bDir} ${bPct}% — an unusually large difference. ` +
-        `This is out of the ordinary compared to historical patterns. ` +
-        `This continued for ${pWord}.`;
-    }
-    return `${mA} changed by an unusually different amount relative to ${mB}. ` +
-      `This is out of the ordinary compared to historical patterns. ` +
-      `This continued for ${pWord}.`;
-  }
-  return `${mA} and ${mB} moved in an unexpected way during this period. ` +
-    `This is out of the ordinary compared to historical data.`;
+
+  // Sentence 2: historical context
+  const s2 = `Historically these two metrics move together ${togetherPct}% of the time.`;
+
+  // Sentence 3: persistence
+  const s3 = persistencePeriods > 1
+    ? ` This pattern continued for ${persistencePeriods} consecutive periods.`
+    : ' This was a single-period departure from that pattern.';
+
+  return `${s1} ${s2}${s3}`;
 }
 
 function makeAnomaly(

@@ -37,7 +37,10 @@ function findSeries(seriesList: Series[], anomaly: Anomaly): Series | undefined 
 }
 
 function displayPeriodEnd(start: Date, end: Date): Date {
-  return end.getTime() > start.getTime() ? new Date(end.getTime() - 86_400_000) : start;
+  if (end.getTime() <= start.getTime()) return start;
+  const diffMs = end.getTime() - start.getTime();
+  if (diffMs <= 8 * 86_400_000) return new Date(start.getTime() + 6 * 86_400_000);
+  return new Date(end.getTime() - 86_400_000);
 }
 
 function buildSummary(anomaly: Anomaly): string {

@@ -14,9 +14,12 @@ function fmtDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-/** Returns the inclusive display end: periodEnd is the next-period start, so subtract one day. */
+/** Returns the inclusive display end: for weekly spans (≤8 days) use start+6 days, otherwise end−1 day. */
 function displayPeriodEnd(start: Date, end: Date): Date {
-  return end.getTime() > start.getTime() ? new Date(end.getTime() - 86_400_000) : start;
+  if (end.getTime() <= start.getTime()) return start;
+  const diffMs = end.getTime() - start.getTime();
+  if (diffMs <= 8 * 86_400_000) return new Date(start.getTime() + 6 * 86_400_000);
+  return new Date(end.getTime() - 86_400_000);
 }
 
 function periodLabel(anomaly: Anomaly): string {
